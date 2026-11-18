@@ -1,0 +1,31 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Arduino / PlatformIO build output
+build/
+.pio/
+*.hex
+*.uf2
+*.elf
+*.bin
+*.map
+
+# Web
+node_modules/
+dist/
+.next/
+.vite/
+.cache/
+
+# Secrets (API keys for the LLM / ElevenLabs stay local)
+.env
+.env.*
+!.env.example
+secrets.h
+
+# OpenSCAD backups
+*.scad.bak
