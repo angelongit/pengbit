@@ -25,4 +25,8 @@ If upload fails, double-tap the reset button to enter the bootloader and try aga
 | `tests/ble_test` | Bluetooth UART: board shows up in Web Bluetooth and echoes lines |
 | `pet/` | The pet itself. Written at the event. |
 
+## Hardware for testing
+
+The XIAO has one 7-pin header on the D0 to D6 side. 3V3 and GND are on the other side, so run jumper wires from those pads to the breadboard rails. The final build drops the header and is wired point to point inside the case.
+
 Pin numbers are in [../docs/wiring.md](../docs/wiring.md). Each test sketch repeats the pins it uses at the top so it stays standalone.

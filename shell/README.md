@@ -1,6 +1,6 @@
-# tidalByte pet shell
+# Pengbit shell
 
-A two-part snap-together handheld case, 46 x 98 x 22 mm, with a keychain loop on top.
+A two-part snap-together handheld case sized for the EEMB 1100 mAh LiPo (LP603449), 46 x 90 x 18.5 mm, with a keychain loop on top.
 Front face: screen window, three buttons in a small smile (A, B, C), speaker holes, a sparkle.
 Back face: engraved "tidalByte". USB-C on the bottom edge, power switch on the right side.
 
@@ -15,7 +15,7 @@ Module sizes vary between sellers, so check these and change the matching value 
 
 | What | Default | Parameter |
 |---|---|---|
-| Battery width x length x thickness | 36 x 65 x 10 | `bat` |
+| Battery width x length x thickness (EEMB LP603449) | 34.5 x 51 x 6.3 | `bat` |
 | OLED circuit board width x height | 27.3 x 27.8 | `oled` |
 | OLED: distance from the board's top edge (pin side) to the middle of the lit area, compared with half the board height | lit area 1 mm toward the pins | `oled_win_off` |
 | Tact switch body height without the stem, and stem height | 3.5 and 1.5 | `tact_body_h`, `tact_stem_h` |
@@ -30,7 +30,7 @@ If anything changes, re-export with OpenSCAD (free): open the file, set `part` t
 - Material: PLA (PETG works too). Translucent or "ice" filament gives a nice Y2K iMac look; the XIAO LEDs may glow faintly through it.
 - Layer height 0.2 mm, 3 walls, 15 to 20% infill. No supports needed.
 - Orientation is already set: front half face down, back half back down, caps flange down.
-- Sliced at 0.2 mm on a generic profile: about 1 h 35 m per half and 10 m for the caps (about 3 h 20 m total, around 35 g of filament). A fast printer like a Bambu will do it in roughly half that.
+- Sliced at 0.2 mm on a generic profile: about 1 h 25 m per half and 10 m for the caps (about 3 h total, around 30 g of filament). A fast printer like a Bambu will do it in roughly half that.
 - Print the back half first and test-fit the battery and XIAO before printing the front.
 
 ## Assembly
@@ -40,7 +40,7 @@ If anything changes, re-export with OpenSCAD (free): open the file, set `part` t
 3. **Buzzer.** Press it into the round socket behind the speaker holes, top facing the holes. Glue it.
 4. **XIAO.** Solder the battery and switch wires to the BAT pads first, then slide the board into the cradle at the bottom of the back half with USB-C poking out of the bottom hole. A dot of glue at the far end keeps it in when you plug in a cable.
 5. **Switch.** Sit it on the little pedestal on the right side, lever through the slot, glue it.
-6. **Battery.** Stick it between the four corner brackets with double-sided foam tape. Run the JST lead out the bottom gap between brackets.
+6. **Battery.** Stick it between the four corner brackets with double-sided foam tape. Run the JST-PH lead out the bottom gap between brackets.
 7. **Close.** Route the wires so nothing sits on the snap lip, line up the halves, and press until the four bumps click. Open it later by putting a fingernail in the small notch on the left side.
 
 ## Tuning the fit

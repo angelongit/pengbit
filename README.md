@@ -24,11 +24,13 @@ Pengbit and its evolved forms are original designs.
 
 - Seeed Studio XIAO nRF52840 **Sense** (IMU + BLE)
 - 0.96" SSD1306 OLED, 128x64, I2C at 0x3C
-- 3.7 V LiPo on the XIAO BAT pads, with a slide switch
+- EEMB 1100 mAh LiPo (LP603449) on the XIAO BAT pads through a JST-PH socket, with an SS12D00 slide switch
 - Active buzzer driven by an NPN transistor
 - 3 tact buttons: A (menu), B (select), C (demo mode)
 
-See [docs/wiring.md](docs/wiring.md) for the pin map.
+- 3D printed case, 46 x 90 x 18.5 mm (`shell/`)
+
+See [docs/wiring.md](docs/wiring.md) for the parts, pin map and power wiring.
 
 ## Getting started
 

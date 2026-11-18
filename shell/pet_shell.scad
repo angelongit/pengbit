@@ -1,5 +1,5 @@
 // tidalByte 26 pet shell: parametric handheld case
-// Parts: XIAO nRF52840 Sense, 0.96" SSD1306 I2C OLED, LP103665 LiPo,
+// Parts: XIAO nRF52840 Sense, 0.96" SSD1306 I2C OLED, EEMB LP603449 1100 mAh LiPo,
 // three 6x6 tact buttons, 12 mm active buzzer, mini slide switch.
 //
 // Coordinates: X = width, Y = height (+Y is the top, where the screen is),
@@ -11,12 +11,12 @@ part = "assembly"; // [assembly, exploded, front, back, caps, check]
 
 /* [Shell] */
 W = 46;          // outer width
-H = 98;          // outer height
-D = 22;          // outer thickness
+H = 90;          // outer height
+D = 18.5;          // outer thickness
 R = 10;          // plan-view corner radius
 er = 3;          // roundover on front and back edges
 wall = 2.0;      // wall thickness
-z_split = 12;    // where the two halves meet
+z_split = 10.5;    // where the two halves meet
 lip_h = 3;       // height of the snap lip on the back half
 lip_t = 1.2;     // lip thickness
 tol = 0.2;       // clearance between lip and front wall (raise to 0.3 if too tight)
@@ -24,16 +24,16 @@ snap = true;     // little detent bumps on the lip
 lanyard = true;  // keychain loop on top
 back_text = "tidalByte";
 
-/* [Battery LP103665] */
-bat = [36, 65, 10];      // measure yours: width, length, thickness
+/* [Battery EEMB LP603449] */
+bat = [34.5, 51, 6.3];      // measure yours: width, length, thickness
 bat_clear = 0.6;
-bat_top_y = 44.5;        // top edge of the battery pocket
+bat_top_y = 40.5;        // top edge of the battery pocket
 
 /* [XIAO nRF52840 Sense] */
 xiao = [17.5, 21];       // board width, length
 xiao_t = 1.2;            // PCB thickness
-xiao_x = 0;              // board center X
-xiao_z = 5;              // underside of the PCB (room for wires on the BAT pads)
+xiao_x = -6;             // board center X
+xiao_z = 3.5;            // underside of the PCB (room for wires on the BAT pads)
 usb_w = 12.5;            // USB-C opening, fits most cable plugs
 usb_h = 7.5;
 usb_ctr_z = xiao_z + xiao_t + 1.6;
@@ -41,7 +41,7 @@ usb_ctr_z = xiao_z + xiao_t + 1.6;
 /* [OLED module] */
 oled = [27.3, 27.8];     // PCB width, height (header pins on the top edge)
 oled_glass_t = 1.6;      // glass thickness above the PCB
-oled_y = 30;             // PCB center Y
+oled_y = 25.5;             // PCB center Y
 oled_win = [24, 13.5];   // window opening (active area is about 21.7 x 10.9)
 oled_win_off = 1.0;      // window center offset from PCB center, toward the header
 oled_clear = 0.3;
@@ -60,12 +60,12 @@ cap_proud = 1.5;         // how far the knob sticks out of the face
 /* [Buzzer] */
 bz_d = 12;
 bz_h = 9.5;
-bz_xy = [12, -33];
+bz_xy = [10.5, -30];
 
 /* [Slide switch] */
 sw_body = [8.6, 4.5, 4.4];  // length along wall, depth into case, height
-sw_y = -34;                 // center of the switch along the right side wall
-sw_z = 5;                   // underside of switch body
+sw_y = -24;                 // center of the switch along the right side wall
+sw_z = 2.5;                 // underside of switch body
 sw_slot = [6.0, 2.6];       // lever slot: width (travel + lever), height
 
 /* [Hidden] */
