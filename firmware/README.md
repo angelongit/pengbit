@@ -1,5 +1,7 @@
 # Firmware
 
+Architecture, driver register sequences and build order: [ARCHITECTURE.md](ARCHITECTURE.md).
+
 Board: **Seeed Studio XIAO nRF52840 Sense**.
 
 ## Arduino IDE setup
@@ -8,7 +10,7 @@ Board: **Seeed Studio XIAO nRF52840 Sense**.
    `https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json`
 2. Boards Manager: install **Seeed nRF52 Boards** (the non-mbed one; it includes the Bluefruit BLE library).
 3. Select board **Seeed XIAO nRF52840 Sense**.
-4. Library Manager: install
+4. Library Manager: install (used by the test sketches, and as fallbacks if a custom driver isn't ready)
    - Adafruit SSD1306
    - Adafruit GFX Library
    - Seeed Arduino LSM6DS3
@@ -23,7 +25,7 @@ If upload fails, double-tap the reset button to enter the bootloader and try aga
 | `tests/io_test` | Buttons A/B/C and the buzzer |
 | `tests/imu_test` | IMU readings and motion magnitude on serial |
 | `tests/ble_test` | Bluetooth UART: board shows up in Web Bluetooth and echoes lines |
-| `pet/` | The pet itself. Written at the event. |
+| `pet/` | The pet itself: our own OLED and IMU drivers plus pet logic. Skeletons now, filled in Thu to Sat. |
 
 ## Hardware for testing
 
