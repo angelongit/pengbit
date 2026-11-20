@@ -1,6 +1,8 @@
 # Bench test (Friday night)
 
-One sketch, `bench_test.ino`, that checks each part on the breadboard one at a time. Add one part, flash nothing new, just type its number in Serial Monitor. If a stage fails you know exactly which part to look at.
+One sketch, `bench_test.ino`, that checks each part on the breadboard one at a time. Flash it once, then add one part at a time and type its number in Serial Monitor. If a stage fails you know exactly which part to look at.
+
+On every reset it prints which board you selected and **runs an I2C scan first**, so you immediately see what's on D4/D5.
 
 | Key | Stage | Wiring needed |
 |---|---|---|
@@ -9,8 +11,12 @@ One sketch, `bench_test.ino`, that checks each part on the breadboard one at a t
 | 3 | OLED text + animation | OLED |
 | 4 | Buttons A/B/C | 3 buttons |
 | 5 | Buzzer chirps | NPN + resistors + buzzer |
-| 6 | IMU (x, y, z, magnitude) | none, it's on the board |
+| 6 | IMU (x, y, z, magnitude) | none on a Sense; a GY-521 / MPU-6050 on D4/D5 on a regular XIAO |
 | 0 | Stop, show menu | |
+
+## First: Sense or regular XIAO?
+
+Flip the board over. The **Sense** has two extra small chips on the back (the IMU and a microphone) and says "Sense" on the box/sticker. If yours says just **XIAO-nRF52840** and the back is bare, it's the regular one: no onboard IMU. Everything else (BLE, pins, battery charging) is the same, and stage 6 uses an external MPU-6050 instead.
 
 ## 0. Arduino IDE setup (once)
 
@@ -18,10 +24,10 @@ One sketch, `bench_test.ino`, that checks each part on the breadboard one at a t
    `https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json`
 2. **Tools > Board > Boards Manager**, search "seeed nrf52", install **Seeed nRF52 Boards** (the one *without* "mbed").
    - Why not mbed: the mbed core works for the IMU too, but `ble_test` and the pet use the Bluefruit BLE library, which only ships with the non-mbed core. One core for everything.
-3. **Tools > Board > Seeed nRF52 Boards > Seeed XIAO nRF52840 Sense**. The "Sense" part matters for the IMU.
+3. **Tools > Board > Seeed nRF52 Boards**, pick the one matching your board: **Seeed XIAO nRF52840 Sense** or **Seeed XIAO nRF52840**. The sketch reads this setting to decide whether to look for the onboard IMU.
 4. **Sketch > Include Library > Manage Libraries**, install:
    - Adafruit SSD1306 (say yes to installing Adafruit GFX + BusIO with it)
-   - Seeed Arduino LSM6DS3
+   - Seeed Arduino LSM6DS3 (only needed for the Sense)
 5. Plug in the XIAO with a **data** USB-C cable, pick its port under **Tools > Port**.
 
 If upload fails or no port appears: double-tap the tiny reset button. The orange LED pulses and a drive called XIAO-SENSE shows up. Pick the new port and upload again.
@@ -94,11 +100,25 @@ DMM check if stuck: with the buzzer "on", voltage from collector to emitter shou
 
 ## Stage 6: IMU
 
-No wiring. Type `6`, lay the board flat: `z` should be close to `1.00` and `mag` close to `1.00`. Shake it and `mag` jumps to 2 or more. That jump is what the pet's shake detection will use.
+**Sense board:** no wiring, it uses the onboard LSM6DS3.
+
+**Regular XIAO:** use the **GY-521 (MPU-6050)** module from the ELEGOO kit. It shares the I2C bus with the OLED, so its wires go to the same rails/pins:
+
+| GY-521 pin | Goes to |
+|---|---|
+| VCC | + rail (3V3) |
+| GND | - rail |
+| SCL | D5 (same as OLED SCL) |
+| SDA | D4 (same as OLED SDA) |
+| XDA, XCL, AD0, INT | leave unconnected |
+
+Two devices on one I2C bus is normal: each has its own address. Press reset and the startup scan should now list **0x3C (OLED)** and **0x68 (MPU-6050)**. The sketch talks to the MPU-6050 with raw `Wire` calls (wake it via register 0x6B, read 6 bytes from 0x3B, divide by 16384 for g), which is a nice preview of writing your own driver.
+
+Then: type `6`, lay it flat: `z` close to `1.00`, `mag` close to `1.00`. Shake it and `mag` jumps to 2 or more. That jump is what the pet's shake detection will use. For the final build the GY-521 goes inside the shell too (it's about 21 x 16 mm), so check it fits next to the battery.
 
 Close Serial Monitor and open **Tools > Serial Plotter** to see it as a graph (type `6` there too).
 
-`IMU not found` almost always means the board is set to plain "XIAO nRF52840" instead of "Sense".
+If it says `No IMU found`: on a Sense, check the board setting says "Sense". On a regular board, check the scan shows 0x68; if it shows 0x69, that's fine too.
 
 ## After this
 

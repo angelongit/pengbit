@@ -8,16 +8,27 @@
 //   3  OLED         text in the yellow band, a box and a counter in the blue area
 //   4  Buttons      prints A / B / C presses (D1, D2, D3 to GND, INPUT_PULLUP)
 //   5  Buzzer       three chirps through the NPN on D0
-//   6  IMU          built-in LSM6DS3: x/y/z in g plus magnitude, ~10 Hz
+//   6  IMU          x/y/z in g plus magnitude, ~10 Hz. Uses the built-in LSM6DS3
+//                   on a Sense board, or an external MPU-6050 (GY-521) on D4/D5.
 //   0  Stop         stop the running test, show the menu again
 //
 // Wiring for each stage is in firmware/tests/bench_test/README.md.
-// Libraries: Adafruit SSD1306, Adafruit GFX Library, Seeed Arduino LSM6DS3.
+// An I2C scan runs automatically at startup.
+// Libraries: Adafruit SSD1306, Adafruit GFX Library.
+// Seeed Arduino LSM6DS3 is only needed when the board is set to the Sense.
 
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+// The onboard IMU only exists on the Sense. The board you pick in Tools > Board
+// decides which of these the IDE defines.
+#if defined(ARDUINO_Seeed_XIAO_nRF52840_Sense) || defined(ARDUINO_SEEED_XIAO_NRF52840_SENSE)
+#define HAS_ONBOARD_IMU 1
 #include <LSM6DS3.h>
+#else
+#define HAS_ONBOARD_IMU 0
+#endif
 
 // ---- Pins (match docs/wiring.md) ----
 const int PIN_BUZZER = D0;  // NPN base through 1k
@@ -29,10 +40,16 @@ const int PIN_BTN_C  = D3;  // demo mode
 const uint8_t OLED_ADDR = 0x3C;
 
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
+#if HAS_ONBOARD_IMU
 LSM6DS3 imu(I2C_MODE, 0x6A);  // on its own internal bus, not D4/D5
+#endif
+
+// External MPU-6050 (GY-521 module), read with raw I2C: no library.
+uint8_t mpuAddr = 0;          // 0x68, or 0x69 if its AD0 pin is pulled high
+enum ImuKind { IMU_NONE, IMU_ONBOARD, IMU_MPU6050 };
+ImuKind imuKind = IMU_NONE;
 
 bool oledReady = false;
-bool imuReady = false;
 int stage = 0;              // which test is running, 0 = none
 unsigned long stageStart = 0;
 unsigned long lastTick = 0;
@@ -82,6 +99,7 @@ void runI2CScan() {
       if (addr < 16) Serial.print('0');
       Serial.print(addr, HEX);
       if (addr == 0x3C || addr == 0x3D) Serial.print(F("  <- SSD1306 OLED"));
+      if (addr == 0x68 || addr == 0x69) Serial.print(F("  <- MPU-6050 (GY-521)"));
       Serial.println();
       found++;
     }
@@ -92,9 +110,7 @@ void runI2CScan() {
   } else {
     Serial.print(F("  ")); Serial.print(found); Serial.println(F(" device(s)."));
   }
-  Serial.println(F("  (The IMU at 0x6A is on a separate internal bus, so it won't show here.)"));
-  stage = 0;
-  printMenu();
+  Serial.println(F("  (A Sense board's own IMU is on a separate internal bus, so it won't show here.)"));
 }
 
 void startOled() {
@@ -170,11 +186,61 @@ void runBuzzer() {
   printMenu();
 }
 
+// Wake the MPU-6050 and check its WHO_AM_I register. Returns true if found.
+bool mpuBegin(uint8_t addr) {
+  Wire.beginTransmission(addr);
+  Wire.write(0x75);                       // WHO_AM_I
+  if (Wire.endTransmission(false) != 0) return false;
+  if (Wire.requestFrom(addr, (uint8_t)1) != 1) return false;
+  uint8_t who = Wire.read();
+  Serial.print(F("  MPU WHO_AM_I = 0x")); Serial.println(who, HEX);
+  // 0x68 is a genuine MPU-6050; clones often answer 0x70, 0x72 or 0x98. All fine.
+  Wire.beginTransmission(addr);
+  Wire.write(0x6B); Wire.write(0x00);     // PWR_MGMT_1 = 0: wake up (it boots asleep)
+  Wire.endTransmission();
+  Wire.beginTransmission(addr);
+  Wire.write(0x1C); Wire.write(0x00);     // ACCEL_CONFIG: +-2 g range
+  Wire.endTransmission();
+  mpuAddr = addr;
+  return true;
+}
+
+// Read the 6 accel bytes starting at ACCEL_XOUT_H (0x3B). Big-endian, signed.
+bool mpuRead(float& x, float& y, float& z) {
+  Wire.beginTransmission(mpuAddr);
+  Wire.write(0x3B);
+  if (Wire.endTransmission(false) != 0) return false;
+  if (Wire.requestFrom(mpuAddr, (uint8_t)6) != 6) return false;
+  int16_t raw[3];
+  for (int i = 0; i < 3; i++) {
+    uint8_t hi = Wire.read();
+    uint8_t lo = Wire.read();
+    raw[i] = (int16_t)((hi << 8) | lo);
+  }
+  const float LSB_PER_G = 16384.0f;       // at +-2 g
+  x = raw[0] / LSB_PER_G;
+  y = raw[1] / LSB_PER_G;
+  z = raw[2] / LSB_PER_G;
+  return true;
+}
+
 void startImu() {
   Serial.println(F("[6] IMU: lay it flat, z should read about 1.00 g. Shake it to see mag jump."));
-  if (!imuReady) imuReady = (imu.begin() == 0);
-  if (!imuReady) {
-    Serial.println(F("  IMU not found. Check the board is set to 'Seeed XIAO nRF52840 Sense'."));
+  if (imuKind == IMU_NONE) {
+#if HAS_ONBOARD_IMU
+    if (imu.begin() == 0) imuKind = IMU_ONBOARD;
+#endif
+    if (imuKind == IMU_NONE && (mpuBegin(0x68) || mpuBegin(0x69))) imuKind = IMU_MPU6050;
+  }
+  if (imuKind == IMU_ONBOARD) Serial.println(F("  using onboard LSM6DS3"));
+  if (imuKind == IMU_MPU6050) Serial.println(F("  using external MPU-6050 on D4/D5"));
+  if (imuKind == IMU_NONE) {
+#if HAS_ONBOARD_IMU
+    Serial.println(F("  No IMU found: onboard LSM6DS3 didn't answer and no MPU-6050 on D4/D5."));
+#else
+    Serial.println(F("  No IMU found. Board is set to the regular XIAO (no onboard IMU),"));
+    Serial.println(F("  and no MPU-6050 answered at 0x68/0x69. Wire a GY-521 to D4/D5 and run 2."));
+#endif
     stage = 0;
     printMenu();
   }
@@ -182,9 +248,18 @@ void startImu() {
 void tickImu() {
   if (millis() - lastTick < 100) return;
   lastTick = millis();
-  float x = imu.readFloatAccelX();
-  float y = imu.readFloatAccelY();
-  float z = imu.readFloatAccelZ();
+  float x = 0, y = 0, z = 0;
+#if HAS_ONBOARD_IMU
+  if (imuKind == IMU_ONBOARD) {
+    x = imu.readFloatAccelX();
+    y = imu.readFloatAccelY();
+    z = imu.readFloatAccelZ();
+  }
+#endif
+  if (imuKind == IMU_MPU6050 && !mpuRead(x, y, z)) {
+    Serial.println(F("  MPU read failed (loose wire?)"));
+    return;
+  }
   float mag = sqrt(x * x + y * y + z * z);
   // "name:value" pairs also work in Serial Plotter
   Serial.print("x:");    Serial.print(x, 2);
@@ -207,7 +282,7 @@ void startStage(int s) {
   switch (s) {
     case 0: Serial.println(F("Stopped.")); printMenu(); break;
     case 1: startBlink(); break;
-    case 2: runI2CScan(); break;
+    case 2: runI2CScan(); stage = 0; printMenu(); break;
     case 3: startOled(); break;
     case 4: startButtons(); break;
     case 5: runBuzzer(); break;
@@ -231,6 +306,14 @@ void setup() {
   while (!Serial && millis() - t < 4000) delay(10);  // wait for the monitor, max 4 s
 
   Wire.begin();  // D4/D5
+
+  Serial.println();
+#if HAS_ONBOARD_IMU
+  Serial.println(F("Board setting: XIAO nRF52840 Sense (onboard IMU expected)"));
+#else
+  Serial.println(F("Board setting: XIAO nRF52840 (regular, no onboard IMU)"));
+#endif
+  runI2CScan();   // always scan first: shows what's actually on D4/D5
   printMenu();
 }
 
