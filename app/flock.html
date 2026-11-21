@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pengbit Flock</title>
+  <meta name="description" content="Live view of Pengbit Flock: phones train the activity model locally and pool only what they learned.">
+  <meta name="theme-color" content="#1b1442">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/flock-screen.css">
+</head>
+<body class="fks">
+  <header class="fks-top">
+    <div>
+      <h1 class="logo">PENGBIT FLOCK</h1>
+      <p class="muted">Federated learning: every phone trains on its own motion and shares only what it learned.</p>
+    </div>
+    <span id="net" class="chip">connecting</span>
+  </header>
+
+  <main class="fks-grid">
+    <section class="fks-card fks-join">
+      <h2>Scan to join</h2>
+      <div id="qr" class="qr" aria-label="QR code to open Pengbit"></div>
+      <p id="joinUrl" class="fks-url"></p>
+      <p class="fine">Open it, tap Wake Pengbit, then Flock → Teach the flock (30 s).</p>
+      <div class="fks-zero">
+        <span class="label">Raw motion uploaded</span>
+        <strong>0 bytes</strong>
+        <small id="onPhones">0 windows stay on phones</small>
+      </div>
+    </section>
+
+    <section class="fks-card fks-ring">
+      <canvas id="ring" width="640" height="560" aria-label="The flock: every Pengbit around the shared model"></canvas>
+      <p id="pendingLine" class="fks-pending">Waiting for penguins...</p>
+    </section>
+
+    <section class="fks-card fks-side">
+      <div class="fks-stats">
+        <div><span class="label">Round</span><strong id="round">0</strong></div>
+        <div><span class="label">Penguins</span><strong id="members">0</strong></div>
+        <div><span class="label">Accuracy</span><strong id="acc">--</strong></div>
+      </div>
+      <h2>Shared model accuracy by round</h2>
+      <canvas id="chart" width="600" height="300" aria-label="Accuracy of the shared model on held-out phone data, per round"></canvas>
+      <p class="fine">Each phone scores the shared model on its own held-out windows and reports only the score.</p>
+      <ol id="log" class="fks-log"></ol>
+      <div class="row wrap">
+        <button id="closeRound" class="btn-chrome">Close round now</button>
+        <label class="toggle"><input type="checkbox" id="sims"> Simulated penguins</label>
+      </div>
+      <p id="simNote" class="fine hidden">4 simulated penguins train on synthetic motion in this browser, each mostly doing one activity. They are labeled "sim" everywhere.</p>
+    </section>
+  </main>
+
+  <script src="js/vendor/qrcode.js"></script>
+  <script type="module" src="js/flock-screen.js"></script>
+</body>
+</html>

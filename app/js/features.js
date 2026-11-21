@@ -2,8 +2,13 @@
 // A feature module exports init(ctx). It fills its own tab-<name> section and calls ctx.showTab(name).
 // Modules load with dynamic import, so a broken or missing feature never stops the pet.
 const FEATURES = [
+ ws/exercise
   // './flock.js',      // W1 Pengbit Flock
   './exercise.js',      // W2 Camera-verified exercise
+
+  './flock.js',         // W1 Pengbit Flock
+  // './exercise.js',   // W2 Camera-verified exercise
+ main
   // './insights.js',   // W3 Predictive nudges + weekly report
   // './talk.js',       // W4 Talk to Professor Floe
   // './desk.js',       // W5 Desk mode (posture)
