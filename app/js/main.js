@@ -207,6 +207,7 @@ function draw(now) {
   // ground
   g.fillStyle = '#1f5566'; g.fillRect(0, 54, W, 1);
   g.fillStyle = '#16404d'; for (let x = (now / 60 * (act === 'walk' ? 1 : 0)) % 8; x < W; x += 8) g.fillRect(W - x, 57, 3, 1);
+  if (ctx.paintBackdrop) ctx.paintBackdrop(g, now, W, H);   // tombstones of past Pengbits (names.js)
 
   // snow when frost or shivering
   if (form === 'frost' || pet.shivering) {
