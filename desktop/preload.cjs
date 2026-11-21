@@ -3,6 +3,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('pengbitDesktop', {
   isDesktop: true,
+  openApp: () => ipcRenderer.invoke('assistant:open'),
+  hideAssistant: () => ipcRenderer.invoke('assistant:hide'),
   toggleRoam: () => ipcRenderer.invoke('roam:toggle'),
   isRoaming: () => ipcRenderer.invoke('roam:is'),
   onRoamChanged: (cb) => ipcRenderer.on('roam:changed', (_e, on) => cb(on)),

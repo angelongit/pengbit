@@ -1,6 +1,10 @@
 # Pebblebit on your desktop
 
-A Clippy-style desktop companion. Pebblebit leaves the browser and walks around on top of every other
+A Clippy-style desktop companion. Pebblebit starts docked in the bottom-right corner. The compact
+assistant shows the current pet, Desk posture, break reminders, and Professor Liveoak's text.
+Use the tray menu to switch to Roam, hide the assistant, or bring it back.
+
+In Roam mode, Pebblebit walks around on top of every other
 window: along the bottom of the screen (on the taskbar/dock edge), hopping, dashing (Sprinter), belly-sliding
 (Frost), teleporting (Glitch), napping when tired, and walking over to your cursor to nag you.
 
@@ -26,10 +30,10 @@ npm install      # first time only, downloads Electron (~100 MB)
 npm start
 ```
 
-Two things open: the normal Pebblebit app window (wake it, hatch it, use Desk mode there) and an invisible
-full-screen layer where Pebblebit roams. Minimize the app window if you like; the pet keeps running.
+Two things open: the normal Pebblebit app window (wake it, hatch it, use Desk mode there) and the
+bottom-right assistant. Minimize the app window if you like; the pet keeps running.
 
-- **ROAM / CATCH** button (top left of the pet screen) or the tray icon turns roaming on and off.
+- **ROAM / CATCH** switches between the docked assistant and roaming. The tray also offers **Hide assistant**.
 - Use the deployed site instead of the local server: `npm run vercel`, or `npm start -- --url=https://pengbit.vercel.app`
   (or set `PENGBIT_URL`). The event Wi-Fi breaks TLS to vercel.app, so the local server is the default.
 - Closing the app window quits everything.
@@ -41,8 +45,8 @@ behaviour. `roam.html` opened in a second tab of the same browser is a preview o
 
 ## How it works
 
-- `main.cjs` opens the app window and a transparent, frameless, always-on-top, non-focusable window covering the
-  primary screen's work area that loads `/roam.html`. It sends the cursor position to that page 30 times a second; when
+- `main.cjs` opens the app and positions the docked `/dock.html` window within the display's work area.
+  Roam uses a transparent, non-focusable window that loads `/roam.html`. It sends the cursor position to that page 30 times a second; when
   the cursor is over the penguin the page turns click-through off (`setIgnoreMouseEvents`) so you can grab it.
 - Both windows load the same origin, so `app/js/roam.js` streams the pet's state (form, mood, posture, shivering, name,
   graveyard) and the professor's lines over `BroadcastChannel('pengbit-roam')`. The engine is `app/js/roamer.js`.
