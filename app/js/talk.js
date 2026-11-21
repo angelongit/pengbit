@@ -90,7 +90,7 @@ export async function init(ctx) {
     const text = typeof message === 'string' ? message : message.message || message.text || '';
     if (!text) return;
     const source = String(message.source || message.role || message.type || '').toLowerCase();
-    addLine(source.includes('user') || source.includes('transcript') ? 'you' : 'floe', text);
+    addLine(source === 'user' || source === 'user_transcript' ? 'you' : 'floe', text);
   }
   async function start() {
     if (conversation) {
@@ -131,7 +131,8 @@ export async function init(ctx) {
       setStatus('Voice chat could not start. Check microphone permission and try again.', 'error');
       ptt.disabled = false;
       // A route failure or unavailable agent means the feature should not advertise a broken tab.
-      if (/voice route|invalid signed url/i.test(error?.message || '')) hideFeature();
+      const reason = String(error?.message || error?.name || '');
+      if (/voice route|invalid signed url|permission|microphone|notallowed|denied/i.test(reason)) hideFeature();
     } finally {
       starting = false;
     }
