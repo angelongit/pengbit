@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pengbit</title>
+  <meta name="description" content="A pixel penguin that only thrives when you move. Walk, sit, shake: it evolves from how you really move.">
+  <meta name="theme-color" content="#1b1442">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Start screen: a tap is needed for motion permission (iOS) and sound. -->
+  <div id="start" class="start">
+    <div class="start-inner">
+      <h1 class="logo">PENGBIT</h1>
+      <p class="tag">the pixel penguin that only thrives when you move</p>
+      <button id="startBtn" class="btn-chrome big">Wake Pengbit</button>
+      <p class="fine">Uses your phone's motion sensor. Nothing leaves your phone except the pet's stats when you ask the professor.</p>
+    </div>
+  </div>
+
+  <main class="app">
+    <header class="top">
+      <h1 class="logo small">PENGBIT</h1>
+      <div class="chips">
+        <span id="chipSensor" class="chip">no sensor</span>
+        <span id="chipModel" class="chip">thresholds</span>
+        <span id="chipDemo" class="chip hidden">DEMO x60</span>
+      </div>
+    </header>
+
+    <!-- The handheld -->
+    <section class="device" aria-label="Pengbit handheld">
+      <div class="screen">
+        <div class="band">
+          <span id="petName">Pengbit</span>
+          <span id="petAge">egg</span>
+        </div>
+        <div class="stage">
+          <canvas id="scene" width="96" height="64"></canvas>
+          <div id="bubble" class="bubble hidden"></div>
+        </div>
+        <div class="lcd-stats">
+          <div class="stat"><span>JOY</span><div class="bar"><i id="barHappy"></i></div></div>
+          <div class="stat"><span>NRG</span><div class="bar"><i id="barEnergy"></i></div></div>
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="btnA" class="hw"><b>A</b><small>Feed</small></button>
+        <button id="btnB" class="hw"><b>B</b><small>Play</small></button>
+        <button id="btnC" class="hw"><b>C</b><small>Demo · hold: evolve</small></button>
+      </div>
+    </section>
+
+    <section class="now">
+      <div class="act">
+        <span class="label">Right now</span>
+        <strong id="actName">still</strong>
+        <span id="actConf" class="muted"></span>
+      </div>
+      <div class="lean">
+        <span class="label">Growing into</span>
+        <strong id="leanName">?</strong>
+        <span id="evoEta" class="muted"></span>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist">
+      <button data-tab="dex" class="on">Professor</button>
+      <button data-tab="health">Health</button>
+      <button data-tab="train">Train AI</button>
+      <button data-tab="setup">Setup</button>
+    </nav>
+
+    <!-- Professor -->
+    <section id="tab-dex" class="panel">
+      <div class="prof">
+        <div class="prof-face" aria-hidden="true">
+          <canvas id="profFace" width="16" height="16"></canvas>
+        </div>
+        <div>
+          <strong>Professor Floe</strong>
+          <p class="muted">Penguin researcher. Writes dex entries and keeps you moving.</p>
+        </div>
+      </div>
+      <blockquote id="dexText" class="dex">Wake the egg, then ask me for a dex entry.</blockquote>
+      <div class="row">
+        <button id="btnDex" class="btn-chrome">New dex entry</button>
+        <button id="btnCoach" class="btn-chrome">Coach me</button>
+        <button id="btnSpeak" class="btn-ghost">Read aloud</button>
+      </div>
+      <p id="aiSource" class="fine"></p>
+      <details>
+        <summary>Past entries</summary>
+        <ol id="dexHistory" class="history"></ol>
+      </details>
+    </section>
+
+    <!-- Health -->
+    <section id="tab-health" class="panel hidden">
+      <p class="muted">Students sit for hours. Pengbit shivers after 45 minutes still and warms up when you walk.</p>
+      <div class="cards">
+        <div class="card"><span class="label">Sitting streak</span><strong id="hStreak">0 min</strong></div>
+        <div class="card"><span class="label">Nudges answered</span><strong id="hNudges">0 / 0</strong></div>
+        <div class="card"><span class="label">Walking</span><strong id="hWalk">0 min</strong></div>
+        <div class="card"><span class="label">Still</span><strong id="hStill">0 min</strong></div>
+        <div class="card"><span class="label">Shaking</span><strong id="hShake">0 min</strong></div>
+        <div class="card"><span class="label">Answer rate</span><strong id="hRate">n/a</strong></div>
+      </div>
+      <div class="mix" aria-label="Activity mix">
+        <i id="mixWalk" class="walk"></i><i id="mixStill" class="still"></i><i id="mixShake" class="shake"></i>
+      </div>
+      <p class="fine">Times are pet minutes. In demo mode one real second is one pet minute.</p>
+    </section>
+
+    <!-- Train -->
+    <section id="tab-train" class="panel hidden">
+      <p class="muted">Pengbit tells walking, sitting and shaking apart with a small neural network trained right here on your own motion. Record each move, then train.</p>
+      <div class="seg" id="labelSeg">
+        <button data-label="walk" class="on">Walk</button>
+        <button data-label="still">Still</button>
+        <button data-label="shake">Shake</button>
+      </div>
+      <div class="row">
+        <select id="recSecs" aria-label="Record length">
+          <option value="20">20 s</option>
+          <option value="40" selected>40 s</option>
+          <option value="60">60 s</option>
+        </select>
+        <button id="btnRec" class="btn-chrome">Record</button>
+      </div>
+      <div class="progress"><i id="recBar"></i></div>
+      <p id="recMsg" class="fine">Walk: phone in your pocket, walk normally. Still: phone on the desk or in hand. Shake: shake the phone.</p>
+      <div class="counts">
+        <span>walk <b id="cWalk">0</b></span><span>still <b id="cStill">0</b></span><span>shake <b id="cShake">0</b></span>
+      </div>
+      <div class="row">
+        <button id="btnTrain" class="btn-chrome">Train model</button>
+        <label class="toggle"><input type="checkbox" id="useModel"> Use ML model</label>
+      </div>
+      <div id="trainOut" class="train-out"></div>
+      <details>
+        <summary>Live sensor features</summary>
+        <pre id="liveFeat" class="feat"></pre>
+      </details>
+      <details>
+        <summary>Data and model files</summary>
+        <div class="row wrap">
+          <button id="btnExportModel" class="btn-ghost">Export model</button>
+          <button id="btnExportData" class="btn-ghost">Export data</button>
+          <label class="btn-ghost file">Import data<input type="file" id="importData" accept=".json" hidden></label>
+          <button id="btnClearData" class="btn-ghost danger">Clear data</button>
+        </div>
+        <p class="fine">Commit an exported model as <code>app/model/activity-model.json</code> and every new phone starts with it.</p>
+      </details>
+    </section>
+
+    <!-- Setup -->
+    <section id="tab-setup" class="panel hidden">
+      <label class="field">Name <input id="nameInput" maxlength="12" autocomplete="off"></label>
+      <label class="toggle"><input type="checkbox" id="demoToggle"> Demo mode (x60 time)</label>
+      <label class="toggle"><input type="checkbox" id="voiceToggle" checked> Professor speaks</label>
+      <label class="toggle"><input type="checkbox" id="coachToggle" checked> Coach me when I sit too long</label>
+      <label class="toggle"><input type="checkbox" id="wakeToggle" checked> Keep screen on</label>
+      <div class="field">Simulate activity (no sensor)
+        <div class="seg" id="simSeg">
+          <button data-sim="" class="on">Off</button>
+          <button data-sim="walk">Walk</button>
+          <button data-sim="still">Still</button>
+          <button data-sim="shake">Shake</button>
+        </div>
+      </div>
+      <div class="row wrap">
+        <button id="btnEvolve" class="btn-chrome">Evolve now</button>
+        <button id="btnReset" class="btn-ghost danger">New egg</button>
+      </div>
+      <p class="fine">Add to home screen: Share, then "Add to Home Screen" on iPhone, or the install prompt on Android.</p>
+    </section>
+
+    <div id="toast" class="toast hidden"></div>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

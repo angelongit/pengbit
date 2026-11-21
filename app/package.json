@@ -1,0 +1,13 @@
+{
+  "name": "pengbit-app",
+  "private": true,
+  "type": "module",
+  "description": "Pengbit phone app: static PWA + Vercel serverless proxy for the AI professor",
+  "scripts": {
+    "dev": "vercel dev",
+    "serve": "npx --yes serve -l 5173 ."
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0"
+  }
+}
