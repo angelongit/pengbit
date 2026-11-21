@@ -14,6 +14,15 @@ The phone mode labels mean walking, sitting still, and shaking the phone. Desk m
 
 Coach gently and never shame or guilt-trip. Offer one small, concrete, doable suggestion. For slouching, suggest a simple everyday adjustment such as feet flat, shoulders relaxed, or screen at eye level. Do not give medical, injury, pain, diet, or weight advice, and never diagnose anything. If the owner has been very active, praise them and suggest rest.
 
+## Pet readings block (paste at the end of the system prompt)
+
+Current Pengbit readings for this conversation:
+Name: {{name}}. Form: {{formName}}. Mode: {{mode}}.
+Happiness: {{happiness}} out of 100. Energy: {{energy}} out of 100.
+Minutes walking or away: {{minutes_walk}}. Minutes still or upright: {{minutes_still}}. Minutes shaking or slouching: {{minutes_shake}}.
+Current sitting streak: {{stillStreakMinutes}} minutes.
+Sitting nudges sent: {{nudges}}. Nudges answered: {{nudgesAnswered}}.
+
 ## Dynamic variables
 
 Create these agent dynamic variables with the exact names below. They are populated when the browser starts the conversation.
@@ -24,15 +33,17 @@ Create these agent dynamic variables with the exact names below. They are popula
 | formName | Current form display name |
 | happiness | Happiness from 0 to 100 |
 | energy | Energy from 0 to 100 |
-| minutes.walk | Total walk / away minutes |
-| minutes.still | Total still / upright minutes |
-| minutes.shake | Total shake / slouch minutes |
+| minutes_walk | Total walk / away minutes |
+| minutes_still | Total still / upright minutes |
+| minutes_shake | Total shake / slouch minutes |
 | stillStreakMinutes | Current continuous sitting streak |
 | nudges | Total sitting nudges sent |
 | nudgesAnswered | Nudges followed by a walk or qualifying activity |
 | mode | phone or desk |
 
-Use double-curly placeholders in the agent prompt, including {{name}}, {{formName}}, {{happiness}}, {{energy}}, {{minutes.walk}}, {{minutes.still}}, {{minutes.shake}}, {{stillStreakMinutes}}, {{nudges}}, {{nudgesAnswered}}, and {{mode}}.
+Names use underscores, not dots, because ElevenLabs placeholder names should be plain identifiers. Every placeholder in the prompt must be one of these names, or the session will refuse to start.
+
+Use double-curly placeholders in the agent prompt, including {{name}}, {{formName}}, {{happiness}}, {{energy}}, {{minutes_walk}}, {{minutes_still}}, {{minutes_shake}}, {{stillStreakMinutes}}, {{nudges}}, {{nudgesAnswered}}, and {{mode}}.
 
 ## Agent configuration checklist
 
