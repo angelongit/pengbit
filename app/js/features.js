@@ -10,6 +10,7 @@ const FEATURES = [
   // './campus.js',     // W9 Campus wellness dashboard
   './pip.js',           // W6 Floating window (Daniel)
   './mood.js',          // W6 Mood look: glum, scruffy, rounder as joy drops (Daniel)
+  './mirror.js',        // W6 Neglect Mirror: zero joy, Pengbit blames you, webcam morph (Daniel)
 ];
 
 export async function initFeatures(ctx) {
