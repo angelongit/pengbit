@@ -1,1 +1,12 @@
 /* W2: styles for tab-move. Owned by that workstream; scope rules under #tab-move. */
+#tab-move .move-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 50vh;
+  margin: .75rem auto;
+  border: 3px inset #665ab0;
+  border-radius: .5rem;
+}
+#tab-move .move-preview[hidden] { display: none; }
+#tab-move .move-progress, #tab-move .move-offer { color: #9ff3ff; }
+#tab-move .move-hint { min-height: 1.4em; }

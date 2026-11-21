@@ -3,7 +3,7 @@
 // Modules load with dynamic import, so a broken or missing feature never stops the pet.
 const FEATURES = [
   // './flock.js',      // W1 Pengbit Flock
-  // './exercise.js',   // W2 Camera-verified exercise
+  './exercise.js',      // W2 Camera-verified exercise
   // './insights.js',   // W3 Predictive nudges + weekly report
   // './talk.js',       // W4 Talk to Professor Floe
   // './desk.js',       // W5 Desk mode (posture)
