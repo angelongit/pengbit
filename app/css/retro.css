@@ -1,0 +1,296 @@
+/* Y2K retro skin: Win98 windows on a CRT desktop, a Bondi-blue handheld, a marquee.
+   Loaded last on every page. Styles only: no feature logic depends on anything here.
+   Window "client areas" stay dark so every feature stylesheet keeps its colors. */
+:root {
+  --w-face: #c3c7cb;
+  --w-hi: #ffffff;
+  --w-lo: #808080;
+  --w-dk: #0a0a0a;
+  --w-title: linear-gradient(90deg, #000080, #1084d0);
+  --w-title-off: linear-gradient(90deg, #808080, #b5b5b5);
+  --w-client: #0b1736;
+  --raised: inset -1px -1px 0 var(--w-dk), inset 1px 1px 0 var(--w-hi), inset -2px -2px 0 var(--w-lo), inset 2px 2px 0 #dfdfdf;
+  --sunken: inset -1px -1px 0 var(--w-hi), inset 1px 1px 0 var(--w-lo), inset -2px -2px 0 #dfdfdf, inset 2px 2px 0 var(--w-dk);
+  --sys: Tahoma, Verdana, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ---------- Desktop: teal CRT with a pixel grid and stars ---------- */
+html { background: #1d1150; }
+body {
+  font-family: var(--sys);
+  background:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 72% 9%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 88% 42%, #9ff3ff 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 64%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 6% 82%, #ffb3f6 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 88%, #fff 50%, transparent 51%),
+    linear-gradient(rgba(64, 224, 255, 0.07) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(64, 224, 255, 0.07) 1px, transparent 1px) 0 0 / 24px 24px,
+    radial-gradient(90% 55% at 50% 0%, rgba(0, 168, 168, 0.55), transparent 70%),
+    radial-gradient(70% 45% at 100% 100%, rgba(255, 71, 224, 0.28), transparent 70%),
+    linear-gradient(180deg, #063a5c 0%, #0a1f4d 55%, #1d1150 100%);
+  background-attachment: fixed;
+}
+/* CRT scanlines + vignette over everything, never blocks clicks */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 50% 50%, transparent 65%, rgba(0, 0, 0, 0.35) 100%);
+}
+::selection { background: #000080; color: #fff; }
+
+/* WordArt-ish chrome logo */
+.logo {
+  background: linear-gradient(180deg, #fff 0%, #9ff3ff 30%, #ff6bf1 52%, #ffd84a 54%, #fff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(2px 2px 0 #000080) drop-shadow(0 0 10px rgba(64, 224, 255, 0.55));
+}
+
+/* ---------- Start screen: boot splash ---------- */
+.start {
+  background:
+    linear-gradient(rgba(64, 224, 255, 0.08) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(64, 224, 255, 0.08) 1px, transparent 1px) 0 0 / 24px 24px,
+    radial-gradient(90% 60% at 50% 30%, rgba(0, 168, 168, 0.5), transparent 70%),
+    linear-gradient(180deg, #063a5c, #1d1150);
+}
+.start .logo { font-size: clamp(28px, 9vw, 44px); }
+.tag::after { content: "_"; animation: rt-blink 1s steps(1) infinite; }
+@keyframes rt-blink { 50% { opacity: 0; } }
+
+/* XP "start" button for the big call to action */
+.btn-chrome.big {
+  border: 2px solid #1d5a1d; border-radius: 0 14px 14px 0; padding: 12px 26px 12px 20px;
+  background: linear-gradient(180deg, #8fd88f 0%, #3c9c3c 12%, #2f8a2f 60%, #227022 100%);
+  color: #fff; text-shadow: 1px 1px 0 #0b3b0b; font-style: italic;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5), 3px 3px 0 #000;
+}
+.btn-chrome.big::before { content: "\25B6\00a0"; font-style: normal; }
+.btn-chrome.big:active { transform: translate(2px, 2px); box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5), 1px 1px 0 #000; }
+
+/* ---------- Window frame shared by panels, cards, dialogs ---------- */
+.panel, .fks-card, .demo, .onboard, .nm-box, .ex-sheet {
+  position: relative;
+  border: 0; border-radius: 0;
+  background: var(--w-client);
+  padding: 34px 12px 12px;
+  box-shadow: 0 0 0 2px var(--w-face), var(--raised), inset 0 0 0 5px var(--w-face), 6px 6px 0 rgba(0, 0, 0, 0.45);
+  outline: 1px solid var(--w-dk); outline-offset: 2px;
+}
+.panel::before, .fks-card::before, .demo::before, .onboard::before, .nm-box::before, .ex-sheet::before {
+  content: attr(data-title);
+  position: absolute; left: 4px; right: 4px; top: 4px; height: 22px;
+  display: flex; align-items: center; padding: 0 64px 0 6px;
+  background: var(--w-title); color: #fff;
+  font: bold 12px/1 var(--sys); letter-spacing: 0.02em; text-align: left;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* fake minimize / maximize / close */
+.panel::after, .fks-card::after, .demo::after, .onboard::after, .nm-box::after, .ex-sheet::after {
+  content: ""; position: absolute; top: 7px; right: 8px; width: 52px; height: 16px; pointer-events: none;
+  background:
+    linear-gradient(#000, #000) 4px 11px / 7px 2px no-repeat,
+    linear-gradient(#000, #000) 20px 3px / 9px 2px no-repeat,
+    linear-gradient(#000, #000) 20px 3px / 1px 9px no-repeat,
+    linear-gradient(#000, #000) 28px 3px / 1px 9px no-repeat,
+    linear-gradient(#000, #000) 20px 11px / 9px 1px no-repeat,
+    linear-gradient(45deg, transparent 44%, #000 44% 56%, transparent 56%) 39px 3px / 9px 9px no-repeat,
+    linear-gradient(-45deg, transparent 44%, #000 44% 56%, transparent 56%) 39px 3px / 9px 9px no-repeat,
+    linear-gradient(var(--w-face), var(--w-face)) 0 0 / 15px 14px no-repeat,
+    linear-gradient(var(--w-face), var(--w-face)) 16px 0 / 15px 14px no-repeat,
+    linear-gradient(var(--w-face), var(--w-face)) 35px 0 / 16px 14px no-repeat;
+  filter: drop-shadow(1px 1px 0 #000);
+}
+/* Window titles (the frame reads data-title; these give each one a .exe name) */
+#tab-dex::before { content: "\25A0  PROFESSOR.EXE"; } #tab-health::before { content: "\2665  HEALTH.EXE"; }
+#tab-train::before { content: "\2699  TRAIN_AI.EXE"; } #tab-setup::before { content: "\2692  Control Panel"; }
+#tab-flock::before { content: "\2601  FLOCK.EXE - federated learning"; } #tab-move::before { content: "\25B2  MOVE.EXE"; }
+#tab-insights::before { content: "\25C6  INSIGHTS.EXE"; } #tab-talk::before { content: "\260E  FIELD_RADIO.EXE"; }
+#tab-desk::before { content: "\25A3  DESK.EXE - posture cam"; } #tab-campus::before { content: "\2302  CAMPUS.EXE"; }
+.fks-join::before { content: "JOIN.EXE"; } .fks-ring::before { content: "FLOCK.EXE - live"; } .fks-side::before { content: "STATS.EXE"; }
+.demo::before { content: "PENGBIT.EXE"; } .onboard::before { content: "Welcome to Pengbit"; }
+.nm-box::before { content: "New Hardware Found"; } .ex-sheet::before { content: "MOVE.EXE"; }
+.ex-sheet { padding-top: 36px; border-radius: 0; }
+.nm-box, .onboard { padding-top: 36px; }
+
+/* Panels sit under the tab strip like a Win98 property sheet */
+.app > .panel { margin-top: 0; }
+
+/* ---------- Tabs: Win98 tab strip ---------- */
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 2px 0;
+  background: none; border: 0; border-radius: 0; padding: 0 4px; margin-top: 14px;
+}
+.tabs button {
+  flex: 1 1 auto; min-width: 0;
+  padding: 7px 10px 6px; border-radius: 6px 6px 0 0;
+  background: var(--w-face); color: #000; font: 12px/1.1 var(--sys);
+  box-shadow: inset 1px 1px 0 var(--w-hi), inset -1px 0 0 var(--w-dk), inset -2px 0 0 var(--w-lo);
+  margin-top: 3px;
+}
+.tabs button.on {
+  background: var(--w-face); color: #000; font-weight: 700;
+  margin-top: 0; padding-bottom: 9px; position: relative; z-index: 1;
+  box-shadow: inset 1px 1px 0 var(--w-hi), inset -1px 0 0 var(--w-dk), inset -2px 0 0 var(--w-lo);
+  text-decoration: underline dotted;
+}
+.tabs button:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+
+/* ---------- Buttons: raised grey bevels ---------- */
+.btn-chrome, .btn-ghost, .desk-btn, .panel .row > button:not(.btn-chrome):not(.btn-ghost), #mirrorTest, .panel button.btn {
+  border: 0; border-radius: 0;
+  background: var(--w-face); color: #000;
+  font: 700 13px/1.2 var(--sys);
+  padding: 8px 14px; cursor: pointer;
+  box-shadow: var(--raised);
+  text-shadow: none;
+}
+.btn-ghost { font-weight: 400; }
+.btn-chrome:active, .btn-ghost:active, .desk-btn:active, #mirrorTest:active, .panel button.btn:active {
+  transform: none; box-shadow: var(--sunken); padding: 9px 13px 7px 15px;
+}
+.btn-chrome:focus-visible, .btn-ghost:focus-visible, .desk-btn:focus-visible { outline: 1px dotted #000; outline-offset: -5px; }
+.btn-chrome:disabled, .desk-btn:disabled { color: var(--w-lo); text-shadow: 1px 1px 0 #fff; opacity: 1; }
+.danger, .desk-btn.danger { color: #a00000; }
+.desk-btn.primary { outline: 1px solid #000; outline-offset: -1px; }
+.btn-chrome.big { font: italic 700 15px/1 var(--sys); }
+
+/* ---------- Header + status chips + marquee ---------- */
+.top { padding: 4px 0; }
+.chip {
+  border: 0; border-radius: 0; background: #000; color: #9ff3ff;
+  font: 11px/1 var(--sys); padding: 4px 7px;
+  box-shadow: inset 1px 1px 0 var(--w-lo), inset -1px -1px 0 var(--w-hi);
+}
+.chip.ok { color: #7cff9b; } .chip.ml { color: #ff6bf1; } .chip.demo { color: #ffd84a; animation: rt-blink 1.2s steps(1) infinite; }
+
+.rt-marquee {
+  overflow: hidden; white-space: nowrap; margin: 0 0 14px;
+  background: #000; color: #7cff9b; font: 18px/1 var(--term);
+  padding: 4px 0; box-shadow: var(--sunken); border: 2px solid var(--w-face);
+}
+.rt-marquee span { display: inline-block; padding-left: 100%; animation: rt-scroll 26s linear infinite; }
+.rt-marquee b { color: #ffd84a; font-weight: 400; } .rt-marquee i { color: #ff6bf1; font-style: normal; }
+@keyframes rt-scroll { to { transform: translateX(-100%); } }
+
+/* ---------- The handheld: Bondi-blue iMac plastic ---------- */
+.device {
+  background:
+    radial-gradient(60% 34% at 28% 10%, rgba(255, 255, 255, 0.7), transparent 62%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 5px),
+    linear-gradient(150deg, rgba(0, 196, 214, 0.62), rgba(0, 112, 170, 0.5) 60%, rgba(30, 40, 140, 0.55));
+  border: 3px solid rgba(210, 250, 255, 0.95);
+  box-shadow: inset 4px 4px 0 rgba(255, 255, 255, 0.3), inset 0 -16px 30px rgba(0, 30, 90, 0.5), 8px 10px 0 rgba(0, 0, 0, 0.35);
+}
+.screen { border-radius: 6px; border: 4px solid #101820; box-shadow: inset 0 0 0 2px #2b4652, 0 0 0 3px rgba(255, 255, 255, 0.25), 0 0 18px rgba(80, 230, 255, 0.35); }
+.band { background: linear-gradient(90deg, #000080, #1084d0); color: #fff; text-shadow: 1px 1px 0 #000; }
+.stage::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.6);
+}
+.lcd-stats { background: #071d26; }
+.bar { border-color: #9ff3ff; }
+.bar i { background: repeating-linear-gradient(90deg, #9ff3ff 0 5px, transparent 5px 7px); }
+.bar i.low { background: repeating-linear-gradient(90deg, #ff7a7a 0 5px, transparent 5px 7px); }
+.hw small { font: 11px/1.2 var(--sys); font-weight: 700; color: #fff; text-shadow: 1px 1px 0 #000; }
+
+/* ---------- Status cards: sunken LCD readouts ---------- */
+.now > div {
+  border: 0; border-radius: 0; background: #000;
+  box-shadow: 0 0 0 3px var(--w-face), var(--sunken), 4px 4px 0 3px rgba(0, 0, 0, 0.35);
+  margin: 3px;
+}
+.now strong { text-shadow: 0 0 8px currentColor; }
+.label { font-family: var(--sys); letter-spacing: 0.06em; }
+
+/* ---------- Inside windows ---------- */
+.panel { color: var(--ink); }
+.dex {
+  position: relative; border-radius: 0; background: #031a10; color: #7cff9b;
+  box-shadow: var(--sunken); text-shadow: 0 0 6px rgba(124, 255, 155, 0.6);
+  border: 2px solid var(--w-face);
+}
+.dex::after { content: "\2588"; animation: rt-blink 1s steps(1) infinite; margin-left: 2px; font-size: 0.8em; }
+.dex.loading::after { content: "\2588 LOADING..."; }
+.prof-face { border-radius: 0; border: 2px solid var(--w-face); box-shadow: var(--sunken); }
+.card, .fks-stats div { border-radius: 0; background: rgba(0, 0, 0, 0.35); box-shadow: inset 1px 1px 0 #000, inset -1px -1px 0 rgba(255, 255, 255, 0.15); }
+.mix, .progress { border-radius: 0; box-shadow: var(--sunken); border: 2px solid var(--w-face); height: 18px; padding: 2px; background: #000; }
+.progress i { background: repeating-linear-gradient(90deg, #000080 0 8px, transparent 8px 10px); background-color: transparent; }
+.progress i, .mix i { border-radius: 0; }
+.ex-progress i { background: repeating-linear-gradient(90deg, #7cff9b 0 8px, transparent 8px 10px); }
+.seg { border-radius: 0; background: var(--w-face); box-shadow: var(--sunken); padding: 3px; }
+.seg button { border-radius: 0; color: #000; font: 13px/1.2 var(--sys); }
+.seg button.on { background: #000080; color: #fff; box-shadow: none; }
+select, .field input, .nm-box input, .desk-rec-body select, .desk-rec-body input:not([type="checkbox"]) {
+  border: 0; border-radius: 0; background: #fff; color: #000; box-shadow: var(--sunken); padding: 8px;
+}
+.toggle input, .desk-toggle-ml input { accent-color: #000080; }
+summary { color: var(--ink); }
+summary::marker { color: #ffd84a; }
+.feat, .train-out table { border-radius: 0; }
+#tab-flock .fk-side, #tab-flock .fk-teach, #tab-flock .fk-peng, .ex-choice, #tab-talk .talk-status, #tab-talk .talk-transcript, #tab-talk .talk-line { border-radius: 0; }
+#tab-talk .talk-orb { border-radius: 0; }
+#tab-talk .talk-ptt { border-radius: 4px; }
+
+/* Desk mode (its own stylesheet is empty, so it gets the system look here) */
+#tab-desk .desk-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+#tab-desk h3 { margin: 0; font: 12px/1.5 var(--pix); color: #ffd84a; }
+#tab-desk .desk-mode-toggle, #tab-desk .desk-actions, #tab-desk .desk-rec-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0; }
+#tab-desk .desk-status-card { margin-top: 10px; padding: 10px; background: #000; box-shadow: var(--sunken); border: 2px solid var(--w-face); }
+#tab-desk .desk-live-row { display: flex; gap: 10px; align-items: baseline; font: 24px/1 var(--term); color: #9ff3ff; }
+#tab-desk .desk-badge { font: 11px/1 var(--pix); color: #000; background: #ffd84a; padding: 4px 6px; }
+#tab-desk .desk-bar-wrap { height: 12px; margin: 8px 0; border: 1px solid #9ff3ff; padding: 1px; }
+#tab-desk .desk-bar-fill { height: 100%; background: repeating-linear-gradient(90deg, #9ff3ff 0 5px, transparent 5px 7px); transition: width 0.3s; }
+#tab-desk .desk-hint { margin: 6px 0; color: #7cff9b; font: 19px/1.1 var(--term); }
+#tab-desk .desk-actions label { color: #fff; font-size: 14px; display: flex; gap: 6px; align-items: center; }
+#tab-desk .desk-video-wrap { margin-top: 10px; border: 2px solid var(--w-face); box-shadow: var(--sunken); position: relative; }
+#tab-desk .desk-video-wrap video, #tab-desk .desk-video-wrap canvas { display: block; width: 100%; height: auto; }
+#tab-desk .desk-recorder summary { margin-top: 6px; }
+
+/* ---------- Toast: Win98 tooltip balloon ---------- */
+.toast {
+  background: #ffffe1; color: #000; border: 1px solid #000; border-radius: 0;
+  font: 700 13px/1.35 var(--sys); padding: 8px 12px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Dialogs ---------- */
+.onboard-count, .onboard-tag { font-family: var(--pix); }
+.nm-title { filter: drop-shadow(2px 2px 0 #000080); }
+.nm-chick, .ex-stage { border-radius: 0; border: 2px solid var(--w-face); box-shadow: var(--sunken); }
+.ex-rewards span { border-radius: 0; }
+
+/* ---------- Flock big screen / demo page ---------- */
+.fks-card { padding-top: 36px; }
+.qr { border-radius: 0; box-shadow: var(--sunken); border: 3px solid var(--w-face); }
+#chart { border-radius: 0; box-shadow: var(--sunken); }
+.fks-zero { border-radius: 0; }
+.demo { border-radius: 0; padding-top: 44px; }
+#qr { border-radius: 0 !important; border: 4px solid var(--w-face) !important; box-shadow: var(--sunken); }
+
+/* ---------- Laptop: handheld on the left, windows on the right ---------- */
+@media (min-width: 980px) {
+  .app {
+    max-width: 1080px;
+    display: grid; grid-template-columns: 420px minmax(0, 1fr); column-gap: 28px;
+    grid-template-rows: auto auto auto auto auto 1fr;
+    align-items: start;
+  }
+  .app > .top, .app > .rt-marquee { grid-column: 1 / -1; }
+  .app > .device { grid-column: 1; grid-row: 3 / span 4; position: sticky; top: 16px; width: 100%; }
+  .app > .now { grid-column: 2; grid-row: 3; margin-top: 0; }
+  .app > .tabs { grid-column: 2; grid-row: 4; margin-top: 0; }
+  .app > .panel { grid-column: 2; grid-row: 5; }
+  .app > .top .logo.small { font-size: 26px; }
+}
+
+@media (max-width: 380px) {
+  .tabs button { padding: 7px 6px 6px; font-size: 11px; }
+  .panel { padding-left: 9px; padding-right: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rt-marquee span { animation: none; padding-left: 8px; }
+}
