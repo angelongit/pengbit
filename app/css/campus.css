@@ -1,1 +1,16 @@
-/* W5: styles for tab-campus. Owned by that workstream; scope rules under #tab-campus. */
+/* W9 Campus Wellness: styles for tab-campus only. */
+#tab-campus .cw h2 { margin: 0 0 6px; }
+#tab-campus .cw .field select { margin-left: 6px; font: inherit; }
+#tab-campus .cw-me { margin: 6px 0 10px; font-size: 13px; opacity: .9; }
+#tab-campus .cw-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 0 6px; }
+#tab-campus .cw-board { display: flex; flex-direction: column; gap: 6px; }
+#tab-campus .cw-row { display: grid; grid-template-columns: 22px 1fr 34% 38px; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: 6px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .08); }
+#tab-campus .cw-row.me { border-color: #ffd84a; box-shadow: 0 0 0 1px #ffd84a inset; }
+#tab-campus .cw-rank { font-weight: bold; text-align: center; opacity: .8; }
+#tab-campus .cw-name { display: flex; flex-direction: column; font-weight: bold; }
+#tab-campus .cw-name small { font-weight: normal; opacity: .7; font-size: 11px; }
+#tab-campus .cw-bar { height: 10px; border-radius: 5px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+#tab-campus .cw-bar i { display: block; height: 100%; background: linear-gradient(90deg, #4f9a6b, #9ff3ff); }
+#tab-campus .cw-pct { text-align: right; font-variant-numeric: tabular-nums; }
+#tab-campus .cw-empty { opacity: .75; font-size: 13px; }

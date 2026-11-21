@@ -124,11 +124,91 @@ def professor():
     put(g, [(16, y)], A3)
     return g
 
+
+# ---------------------------------------------------------------- study evolutions (ws/evolutions-recap)
+def scholar(f):
+    # Graduation cap with a swaying tassel, and a little pixel wand with a twinkling star.
+    g, cy = penguin(tuft=False)
+    rect(g, 9, 4, 23, 5, A1); rect(g, 12, 6, 20, 7, A1)          # mortarboard
+    put(g, [(16, 3)], A2)                                         # button
+    tx = 22 if f == 'a' else 23
+    put(g, [(22, 5), (tx, 6), (tx, 7), (tx, 8)], A2)              # tassel
+    put(g, [(27, 23), (28, 22), (29, 21), (30, 20)], A3)          # wand
+    star = [(31, 19), (30, 18), (31, 18), (31, 17)] if f == 'a' else [(31, 18), (30, 19), (30, 17), (29, 18), (31, 19), (31, 17)]
+    put(g, star, A2)
+    return g
+
+def hunchling(f):
+    # Curled up and sleepy, with a floppy hat drooping over one side.
+    g, cy = penguin(dy=1 if f == 'b' else 0, blink=True, tuft=False, squash=2)
+    top = cy - 10
+    rect(g, 10, top, 22, top + 1, A1)                             # brim
+    put(g, [(12, top - 1), (13, top - 2), (14, top - 3), (15, top - 3), (16, top - 3), (17, top - 2), (18, top - 2),
+            (19, top - 1), (20, top - 1), (21, top), (22, top + 1), (23, top + 2), (24, top + 3)], A1)
+    rect(g, 13, top - 2, 18, top - 1, A1)
+    put(g, [(24, top + 4), (25, top + 4), (24, top + 5), (25, top + 5)], A2)   # pom-pom
+    put(g, [(27, 6), (28, 5)] if f == 'a' else [(28, 4), (29, 3)], A3)        # a sleepy "z"
+    return g
+
+def trail_mage(f):
+    # Tall wizard hat with a star, a walking staff with a glowing orb, and a messenger bag.
+    g, cy = penguin(flap=(f == 'b'), w=9.5, tuft=False)
+    top = cy - 12
+    for i, half in enumerate([0, 1, 1, 2, 2, 3, 4, 6]):
+        rect(g, 16 - half, top - 7 + i, 16 + half, top - 7 + i, A1)
+    put(g, [(15, top - 3)], A2)
+    for k in range(12):                                           # bag strap across the belly
+        put(g, [(9 + k, 18 + round(k * 0.6))], A3)
+    rect(g, 20, 24, 25, 28, A3); rect(g, 21, 25, 24, 25, A2)     # bag and flap
+    for y in range(8, 31): put(g, [(2, y)], A3)                   # staff
+    orb = [(1, 6), (2, 5), (3, 6), (2, 7), (2, 6)]
+    put(g, orb, A2)
+    if f == 'b': put(g, [(0, 6), (4, 6), (2, 4), (2, 8)], A2)    # orb glow
+    if f == 'b':                                                  # mid-stride feet
+        fy = cy + 13
+        put(g, [(11, fy), (12, fy), (13, fy)], T); put(g, [(10, fy), (11, fy), (12, fy)], FEET)
+    return g
+
+def library_sage(f):
+    # Round glasses, and a stack of books with a page turning.
+    g, cy = penguin(blink=(f == 'b'), tuft=False)
+    ey = cy - 3
+    for x0 in (10, 18):
+        put(g, [(x0, ey - 1), (x0 + 1, ey - 2), (x0 + 2, ey - 2), (x0 + 3, ey - 1), (x0 + 4, ey), (x0 + 4, ey + 1),
+                (x0 + 3, ey + 2), (x0 + 2, ey + 3), (x0 + 1, ey + 3), (x0, ey + 2), (x0 - 1, ey + 1), (x0 - 1, ey)], A2)
+    put(g, [(15, ey), (16, ey), (17, ey)], A2)
+    rect(g, 24, 28, 31, 30, A1); rect(g, 25, 29, 30, 29, SHINE)  # bottom book
+    rect(g, 25, 25, 31, 27, A3); rect(g, 26, 26, 31, 26, SHINE)  # middle book
+    if f == 'a':
+        rect(g, 24, 22, 30, 24, A1); rect(g, 25, 23, 30, 23, SHINE)
+    else:                                                          # top book open, page turning
+        rect(g, 23, 23, 31, 24, SHINE); put(g, [(27, 22), (27, 23), (28, 21), (29, 20)], SHINE); put(g, [(27, 24)], A1)
+    return g
+
+def static_mage(f):
+    # A bent wizard hat and playful sparks crackling around.
+    g, cy = penguin(tuft=False)
+    top = cy - 12
+    rect(g, 9, top + 1, 23, top + 2, A1)
+    for i, (x0, x1) in enumerate([(11, 21), (12, 20), (13, 19), (14, 18), (15, 18), (16, 19), (18, 20), (20, 22)]):
+        rect(g, x0, top - i, x1 if i < 5 else x0 + 2, top - i, A1)
+    put(g, [(22, top - 7), (23, top - 7), (24, top - 6), (25, top - 5), (26, top - 4), (26, top - 3)], A1)   # bent tip
+    sparks = [[(4, 8), (3, 9), (5, 9), (4, 10), (27, 12), (28, 11), (6, 26), (26, 3)],
+              [(5, 7), (27, 9), (26, 10), (28, 10), (27, 11), (3, 18), (2, 19), (4, 19), (3, 20), (25, 27)]][f == 'b']
+    put(g, sparks, A2)
+    put(g, [(7, 13), (25, 16)] if f == 'a' else [(6, 15), (24, 20)], A3)
+    return g
+
 PALETTES = {
     'base':     {OUT: '#e8f4ff', HOOD: '#2b3a55', FACE: '#f6fafd', EYE: '#141b2b', BEAK: '#ffb347', CHEEK: '#ff9fb0',
                  FEET: '#ffb347', SHINE: '#ffffff'},
 }
 FORM_COLORS = {
+    'scholar':      {HOOD: '#2b3a55', A1: '#1c2133', A2: '#ffd84a', A3: '#a87b4f'},
+    'hunchling':    {HOOD: '#3a3550', A1: '#6b5a8e', A2: '#e8d6ff', A3: '#9fb8cc'},
+    'trail_mage':   {HOOD: '#24365e', A1: '#3f6fd8', A2: '#9ff3ff', A3: '#a87b4f'},
+    'library_sage': {HOOD: '#2f4a5e', A1: '#c0504d', A2: '#ffd84a', A3: '#4f9a6b', SHINE: '#f3ead2'},
+    'static_mage':  {HOOD: '#2e2550', A1: '#7a4fd0', A2: '#ffe14a', A3: '#4ff0ff'},
     'egg':      {OUT: '#bcd3e6', FACE: '#eef4f9', A1: '#7fb3d9', A2: '#3c5468'},
     'baby':     {},
     'sprinter': {HOOD: '#24365e', A1: '#ffd84a', A2: '#7fd6ff'},
@@ -151,7 +231,8 @@ def render(g, form):
 
 if __name__ == '__main__':
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-    fns = {'egg': egg, 'baby': baby, 'sprinter': sprinter, 'frost': frost, 'glitch': glitch, 'slouch': slouch}
+    fns = {'egg': egg, 'baby': baby, 'sprinter': sprinter, 'frost': frost, 'glitch': glitch, 'slouch': slouch,
+           'scholar': scholar, 'hunchling': hunchling, 'trail_mage': trail_mage, 'library_sage': library_sage, 'static_mage': static_mage}
     tiles = []
     for name, fn in fns.items():
         for f in 'ab':

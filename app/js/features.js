@@ -8,7 +8,7 @@ const FEATURES = [
   // './insights.js',   // W3 Predictive nudges + weekly report
   './talk.js',          // W4 Talk to Professor Liveoak
   './desk.js',          // W5 Desk mode (posture)
-  // './campus.js',     // W9 Campus wellness dashboard
+  './campus.js',        // W9 Campus wellness dashboard
   './pip.js',           // W6 Floating window (Daniel)
   './names.js',         // Hatch naming, retired names, tombstones of past Pebblebits
   './mood.js',          // W6 Mood look: glum, scruffy, rounder as joy drops (Daniel)
