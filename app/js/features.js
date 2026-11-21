@@ -8,6 +8,7 @@ const FEATURES = [
   // './talk.js',       // W4 Talk to Professor Floe
   // './desk.js',       // W5 Desk mode (posture)
   // './campus.js',     // W9 Campus wellness dashboard
+  './onboarding.js',    // W8 first-run introduction
 ];
 
 export async function initFeatures(ctx) {
