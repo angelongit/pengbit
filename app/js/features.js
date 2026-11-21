@@ -9,6 +9,7 @@ const FEATURES = [
   './desk.js',          // W5 Desk mode (posture)
   // './campus.js',     // W9 Campus wellness dashboard
   './pip.js',           // W6 Floating window (Daniel)
+  './mood.js',          // W6 Mood look: glum, scruffy, rounder as joy drops (Daniel)
 ];
 
 export async function initFeatures(ctx) {
