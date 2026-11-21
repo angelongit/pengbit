@@ -1,4 +1,4 @@
-/* Pengbit floating window (Daniel, W6). Loaded only inside the Picture-in-Picture document,
+/* Pebblebit floating window (Daniel, W6). Loaded only inside the Picture-in-Picture document,
    so these page-wide rules never touch the main app. The FLOAT launcher styles itself (js/pip.js). */
 :root {
   --tidal: #1f5fbf; --tidal-dark: #0d3270; --face: #c9d3e0; --screen: #0d2a36;

@@ -1,4 +1,4 @@
-// Pengbit pet rules, ported from the firmware (firmware/pet/pet_state.cpp + config.h).
+// Pebblebit pet rules, ported from the firmware (firmware/pet/pet_state.cpp + config.h).
 // All time is in pet seconds. tick() gets 1 per real second, or DEMO_SPEEDUP in demo mode.
 
 export const CFG = {
@@ -24,10 +24,10 @@ export const CFG = {
 
 export const FORMS = {
   egg:      { name: 'Egg',              blurb: 'Something is wiggling inside.' },
-  baby:     { name: 'Pengbit',          blurb: 'A tiny penguin chick made of pixels.' },
-  sprinter: { name: 'Sprinter Pengbit', blurb: 'Raised on walks. Fast, sleek, always moving.' },
-  frost:    { name: 'Frost Pengbit',    blurb: 'Raised sitting still. Calm, icy, a little sleepy.' },
-  glitch:   { name: 'Glitch Pengbit',   blurb: 'Raised on shakes. Crackles with static.' },
+  baby:     { name: 'Pebblebit',          blurb: 'A tiny penguin chick made of pixels.' },
+  sprinter: { name: 'Sprinter Pebblebit', blurb: 'Raised on walks. Fast, sleek, always moving.' },
+  frost:    { name: 'Frost Pebblebit',    blurb: 'Raised sitting still. Calm, icy, a little sleepy.' },
+  glitch:   { name: 'Glitch Pebblebit',   blurb: 'Raised on shakes. Crackles with static.' },
 };
 
 // Activity names per mode. Desk mode reuses the same three slots for posture.
@@ -42,11 +42,12 @@ export class Pet {
   constructor(saved) {
     this.reset();
     if (saved) Object.assign(this, saved);
+    if (this.name === 'Pengbit') this.name = 'Pebblebit';   // old default name, from before the rename
     this.events = [];
   }
 
   reset() {
-    this.name = this.name || 'Pengbit';
+    this.name = this.name || 'Pebblebit';
     this.mode = this.mode || 'phone';     // 'phone' (motion) or 'desk' (posture); kept across new eggs
     this.happy = CFG.STAT_START;
     this.energy = CFG.STAT_START;

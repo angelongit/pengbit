@@ -1,15 +1,15 @@
-// Pet names and the Pengbit memorial.
+// Pet names and the Pebblebit memorial.
 //
-// Naming: when the egg hatches, a dialog asks for the chick's name. Names of Pengbits that have
+// Naming: when the egg hatches, a dialog asks for the chick's name. Names of Pebblebits that have
 // passed away are retired for good (case and spaces don't matter), and Professor Liveoak gently
 // says why when you try one. The Setup name field follows the same rule.
 //
-// Memorial: when a Pengbit dies (mood.js emits pet:died), it gets a permanent tombstone with its
+// Memorial: when a Pebblebit dies (mood.js emits pet:died), it gets a permanent tombstone with its
 // name, form and dates. Tombstones stand in the background of every later pet's scene, and the
 // scene takes turns showing each one's name above its stone. The list lives in localStorage
 // (pengbit.graveyard) and is also shown in Setup.
 //
-// Shared state for other features (e.g. the desktop-roaming Pengbit): ctx.pet.name is the name,
+// Shared state for other features (e.g. the desktop-roaming Pebblebit): ctx.pet.name is the name,
 // the bus emits pet:named {name} when it changes, and ctx.names = { current(), isRetired(name),
 // graveyard() }.
 //
@@ -44,7 +44,7 @@ function fmtAge(s) {
 const fmtDate = (t) => (t ? new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '?');
 
 // ------------------------------------------------------------ Professor Liveoak
-const formWord = (g) => (g.form && g.form !== 'baby' && g.form !== 'egg' ? FORMS[g.form]?.name || 'Pengbit' : 'little Pengbit');
+const formWord = (g) => (g.form && g.form !== 'baby' && g.form !== 'egg' ? FORMS[g.form]?.name || 'Pebblebit' : 'little Pebblebit');
 const DISCOURAGE = [
   (g) => `Ah. ${g.name}. That name is already carved on a little stone out back, where ${g.name} the ${formWord(g)} is resting. Let's leave it with them, and give this chick a name of its very own.`,
   (g) => `Hmm, I'm afraid ${g.name} is taken, in the gentlest way. It belongs to an old friend who lived ${g.age}. We honor them best by letting this little one be someone new.`,
@@ -71,9 +71,9 @@ function bury(dead) {
   const pet = ctx.pet;
   graves.push({
     id,
-    name: dead.name || pet.name || 'Pengbit',
+    name: dead.name || pet.name || 'Pebblebit',
     form: pet.form,
-    formName: FORMS[pet.form]?.name || 'Pengbit',
+    formName: FORMS[pet.form]?.name || 'Pebblebit',
     age: dead.age || fmtAge(pet.age),
     hatchedAt: pet.hatchedAt || null,
     diedAt: id,
@@ -96,7 +96,7 @@ function setName(name) {
 
 function suggestion() {
   const free = SUGGEST.filter((s) => !retired(s) && normName(s) !== normName(ctx.pet.name));
-  return free.length ? free[Math.floor(Math.random() * free.length)] : `Pengbit ${graves.length + 1}`;
+  return free.length ? free[Math.floor(Math.random() * free.length)] : `Pebblebit ${graves.length + 1}`;
 }
 
 function openNameDialog() {
@@ -108,7 +108,7 @@ function openNameDialog() {
     <form class="nm-box" autocomplete="off">
       <div class="nm-title">IT HATCHED!</div>
       <canvas class="nm-chick" width="32" height="32"></canvas>
-      <label class="nm-label" for="nmInput">Give your Pengbit a name</label>
+      <label class="nm-label" for="nmInput">Give your Pebblebit a name</label>
       <input id="nmInput" class="nm-input" maxlength="${MAX_LEN}" placeholder="name" enterkeyhint="done">
       <p class="nm-note" aria-live="polite"></p>
       <div class="nm-row">
@@ -126,13 +126,13 @@ function openNameDialog() {
   const note = dialog.querySelector('.nm-note');
   const form = dialog.querySelector('form');
   const prev = clean(pet.name);
-  input.value = prev && prev !== 'Pengbit' && prev !== 'Egg' && !retired(prev) ? prev : '';
+  input.value = prev && prev !== 'Pebblebit' && prev !== 'Pengbit' && prev !== 'Egg' && !retired(prev) ? prev : '';
   input.addEventListener('input', () => { note.textContent = ''; note.classList.remove('bad'); input.classList.remove('bad'); });
   dialog.querySelector('.nm-suggest').onclick = () => { input.value = suggestion(); input.dispatchEvent(new Event('input')); input.focus(); };
   form.onsubmit = (e) => {
     e.preventDefault();
     const name = clean(input.value);
-    if (!name) { note.textContent = 'Every Pengbit deserves a name.'; note.classList.add('bad'); input.focus(); return; }
+    if (!name) { note.textContent = 'Every Pebblebit deserves a name.'; note.classList.add('bad'); input.focus(); return; }
     const g = retired(name);
     if (g) {
       discourage(g);

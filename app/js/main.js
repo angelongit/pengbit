@@ -1,4 +1,4 @@
-// Pengbit phone app: glue between the pet, the motion detector, the canvas and the professor.
+// Pebblebit phone app: glue between the pet, the motion detector, the canvas and the professor.
 import { Pet, CFG, FORMS, MODE_LABELS } from './pet.js';
 import { ActivityDetector, MLP, ACTS, FEATURE_NAMES, requestMotionPermission } from './activity.js';
 import { loadSprites, sprite } from './sprites.js';
@@ -166,11 +166,11 @@ function renderStatus() {
 
   if (pet.isEgg) { $('leanName').textContent = 'hatching'; $('evoEta').textContent = 'keep it with you'; }
   else if (pet.form === 'baby') {
-    $('leanName').textContent = FORMS[pet.dominantForm()].name.replace(' Pengbit', '');
+    $('leanName').textContent = FORMS[pet.dominantForm()].name.replace(' Pebblebit', '');
     const left = Math.max(0, CFG.EVOLVE_AGE_S - pet.age);
     const realS = left / (settings.demo ? CFG.DEMO_SPEEDUP : 1);
     $('evoEta').textContent = left ? `evolves in ~${realS < 120 ? Math.ceil(realS) + ' s' : Math.ceil(realS / 60) + ' min'}` : (pet.happy < CFG.EVOLVE_MIN_HAPPY ? 'needs more joy' : 'any moment');
-  } else { $('leanName').textContent = FORMS[pet.form].name.replace(' Pengbit', ''); $('evoEta').textContent = 'fully evolved'; }
+  } else { $('leanName').textContent = FORMS[pet.form].name.replace(' Pebblebit', ''); $('evoEta').textContent = 'fully evolved'; }
 
   // chips
   const sensor = detector.hasSensor;
@@ -207,7 +207,7 @@ function draw(now) {
   // ground
   g.fillStyle = '#1f5566'; g.fillRect(0, 54, W, 1);
   g.fillStyle = '#16404d'; for (let x = (now / 60 * (act === 'walk' ? 1 : 0)) % 8; x < W; x += 8) g.fillRect(W - x, 57, 3, 1);
-  if (ctx.paintBackdrop) ctx.paintBackdrop(g, now, W, H);   // tombstones of past Pengbits (names.js)
+  if (ctx.paintBackdrop) ctx.paintBackdrop(g, now, W, H);   // tombstones of past Pebblebits (names.js)
 
   // snow when frost or shivering
   if (form === 'frost' || pet.shivering) {
@@ -470,13 +470,13 @@ function wire() {
       const j = JSON.parse(await file.text());
       const rows = (j.rows || j).filter((r) => Array.isArray(r.f) && r.f.length === FEATURE_NAMES.length && ACTS.includes(r.label));
       dataset = dataset.concat(rows); store.set('dataset', dataset); countData(); toast(`Imported ${rows.length} windows.`);
-    } catch { toast('Not a Pengbit data file.'); }
+    } catch { toast('Not a Pebblebit data file.'); }
     e.target.value = '';
   };
   $('btnClearData').onclick = () => { if (confirm('Delete all recorded training data on this phone?')) { dataset = []; store.set('dataset', dataset); countData(); } };
 
   $('nameInput').value = pet.name;
-  $('nameInput').onchange = (e) => { pet.name = e.target.value.trim().slice(0, 12) || 'Pengbit'; store.set('pet', pet); renderStatus(); };
+  $('nameInput').onchange = (e) => { pet.name = e.target.value.trim().slice(0, 12) || 'Pebblebit'; store.set('pet', pet); renderStatus(); };
   $('demoToggle').checked = settings.demo; $('demoToggle').onchange = (e) => setDemo(e.target.checked);
   $('voiceToggle').checked = settings.voice; $('voiceToggle').onchange = (e) => { settings.voice = e.target.checked; saveSettings(); if (!settings.voice) stopSpeaking(); };
   $('coachToggle').checked = settings.autoCoach; $('coachToggle').onchange = (e) => { settings.autoCoach = e.target.checked; saveSettings(); };

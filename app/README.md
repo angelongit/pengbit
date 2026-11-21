@@ -1,7 +1,7 @@
-# Pengbit phone app
+# Pebblebit phone app
 
 The pet moved from the XIAO to the phone. It is an installable web app (PWA): open the link,
-tap **Wake Pengbit**, and the phone's motion sensor feeds the pet. Add it to the home screen to use it like an app.
+tap **Wake Pebblebit**, and the phone's motion sensor feeds the pet. Add it to the home screen to use it like an app.
 
 ## What's in it
 
@@ -19,7 +19,7 @@ tap **Wake Pengbit**, and the phone's motion sensor feeds the pet. Add it to the
   browser's speech voice, so the demo never breaks.
 - **No phone?** Setup -> Simulate, or keys W / S / K (walk / still / shake), D (demo), E (evolve).
 
-- **Roaming Pengbit**: the ROAM button lets it walk around over the page; the desktop companion in `../desktop/`
+- **Roaming Pebblebit**: the ROAM button lets it walk around over the page; the desktop companion in `../desktop/`
   (Electron, `npm start`) lets it walk over your whole desktop like Clippy. See `desktop/README.md`.
 
 ## Deploy (Vercel, about 2 minutes)
@@ -58,7 +58,7 @@ New features plug in without editing `main.js`:
    Desk mode: `pet.mode` is 'phone' or 'desk'; `MODE_LABELS` in pet.js gives display names; `new MLP(null, { nIn })`.
 5. Add new files to `SHELL` in `sw.js` and bump `CACHE`.
 
-## Pengbit Flock (federated learning)
+## Pebblebit Flock (federated learning)
 
 Phones train the walk/still/shake model on their own recordings and share only **what they learned**:
 259 model weights, a sample count and per-feature sums (for shared normalization). Raw motion windows never leave the phone.

@@ -72,8 +72,8 @@ export async function init(ctx) {
     const p = ctx.pet.summary();
     const mins = p.minutes || {};
     return {
-      name: String(p.name || 'Pengbit'),
-      formName: String(p.formName || p.form || 'Pengbit'),
+      name: String(p.name || 'Pebblebit'),
+      formName: String(p.formName || p.form || 'Pebblebit'),
       happiness: Number(p.happiness ?? 0),
       energy: Number(p.energy ?? 0),
       minutes_walk: Number(mins.walk ?? 0),

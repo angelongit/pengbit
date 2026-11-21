@@ -1,9 +1,9 @@
 // Roam (desktop companion seam). Two jobs:
 //  1. Broadcasts the pet's state, its little lines and Professor Liveoak's lines on the
 //     BroadcastChannel 'pengbit-roam', so roam.html (the desktop overlay from desktop/, or any
-//     other same-origin window) can show the same Pengbit walking around.
+//     other same-origin window) can show the same Pebblebit walking around.
 //  2. Adds a ROAM button on the pet screen. In the desktop app it turns the desktop overlay on and off;
-//     in a normal browser it lets Pengbit roam over this page (the fallback when the desktop app
+//     in a normal browser it lets Pebblebit roam over this page (the fallback when the desktop app
 //     isn't running).
 // Uses only the seam: ctx (pet, getActivity, chirp) and bus events.
 import { createRoamer, loadSprites } from './roamer.js';
@@ -17,7 +17,7 @@ function snapshot() {
   const p = ctx.pet || {};
   const a = ctx.getActivity ? ctx.getActivity() : {};
   return {
-    t: Date.now(), name: p.name || 'Pengbit', form: p.form, isEgg: !!p.isEgg, happy: p.happy, energy: p.energy,
+    t: Date.now(), name: p.name || 'Pebblebit', form: p.form, isEgg: !!p.isEgg, happy: p.happy, energy: p.energy,
     hungry: !!p.hungry, sad: !!p.sad, shivering: !!p.shivering, stillMin: Math.floor((p.stillStreak || 0) / 60),
     mode: p.mode, act: a.act, posture, dead,
     graves: (ctx.names?.graveyard?.() || []).map((g) => g.name).filter(Boolean).slice(-6),
@@ -87,7 +87,7 @@ function addButton() {
   const b = document.createElement('button');
   b.id = 'roamLaunch';
   b.type = 'button';
-  b.title = desktop ? 'Let Pengbit loose on your desktop' : 'Let Pengbit roam around this page';
+  b.title = desktop ? 'Let Pebblebit loose on your desktop' : 'Let Pebblebit roam around this page';
   b.onclick = toggle;
   Object.assign(b.style, {
     position: 'absolute', top: '6px', left: '6px', zIndex: 5, padding: '2px 7px', cursor: 'pointer',
@@ -125,7 +125,7 @@ async function startInPage() {
   roamer.setState(snapshot());
   window.addEventListener('mousemove', onMove);
   setLabel(true);
-  roamer.say(`${ctx.pet?.name || 'Pengbit'} is loose! Press CATCH to put me back.`, { ms: 4000 });
+  roamer.say(`${ctx.pet?.name || 'Pebblebit'} is loose! Press CATCH to put me back.`, { ms: 4000 });
 }
 function onMove(e) { roamer?.setCursor(e.clientX, e.clientY); }
 function stopInPage() {

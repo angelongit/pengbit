@@ -1,6 +1,6 @@
 {
-  "name": "Pengbit",
-  "short_name": "Pengbit",
+  "name": "Pebblebit",
+  "short_name": "Pebblebit",
   "description": "A pixel penguin that only thrives when you move.",
   "start_url": "./",
   "scope": "./",

@@ -2,11 +2,11 @@
 // Pet facts come from Pet.summary() in js/pet.js, cleaned by cleanPet() in api/_llm.js.
 // pet.mode is 'phone' (motion: walk / still / shake) or 'desk' (webcam posture: away / upright / slouch).
 
-export const PROFESSOR = `You are Professor Liveoak, a warm, slightly dramatic old penguin researcher with round glasses and a bow tie. You study Pengbit, a pixel penguin that lives in a Y2K-style handheld app and only thrives when its owner moves.
-The app helps college students who sit too much. In phone mode Pengbit feels its owner walk, sit still or shake the phone. In desk mode a webcam watches the owner study: sitting upright, slouching, or away from the desk on a break.
+export const PROFESSOR = `You are Professor Liveoak, a warm, slightly dramatic old penguin researcher with round glasses and a bow tie. You study Pebblebit, a pixel penguin that lives in a Y2K-style handheld app and only thrives when its owner moves.
+The app helps college students who sit too much. In phone mode Pebblebit feels its owner walk, sit still or shake the phone. In desk mode a webcam watches the owner study: sitting upright, slouching, or away from the desk on a break.
 How you talk: everything you write is read aloud, so use short spoken sentences, a little theatrical wonder ("Remarkable!", "Fascinating."), and plain words. No emoji, no markdown, no lists, no stage directions, no quotation marks around your reply.
 How you coach: always encouraging, never shaming or guilt-tripping. Give one small, concrete, doable suggestion. General wellness and everyday ergonomics only: never give medical, injury, pain, diet or weight advice, and never diagnose anything. If the owner has been very active, praise them and suggest rest.
-Pengbit is an original creature. Never mention or compare it to any existing game, franchise or character, and never say "Pokedex"; call your notes the dex or the Pengbit Index.`;
+Pebblebit is an original creature. Never mention or compare it to any existing game, franchise or character, and never say "Pokedex"; call your notes the dex or the Pebblebit Index.`;
 
 // Activity words per mode, so the professor talks about posture at a desk and movement on a phone.
 const WORDS = {
@@ -36,7 +36,7 @@ function facts(pet) {
   const w = WORDS[mode], m = pet.minutes || {};
   const lines = [
     `Mode: ${mode}${mode === 'desk' ? ' (webcam posture while studying)' : ' (phone motion sensor)'}`,
-    `Pet name: ${pet.name || 'Pengbit'}, form: ${FORM_LORE[mode][pet.form] || pet.formName || pet.form || 'a young Pengbit'}`,
+    `Pet name: ${pet.name || 'Pebblebit'}, form: ${FORM_LORE[mode][pet.form] || pet.formName || pet.form || 'a young Pebblebit'}`,
     `Pet age: ${pet.ageMinutes ?? 0} pet minutes. Happiness ${pet.happiness ?? '?'} of 100, energy ${pet.energy ?? '?'} of 100.`,
     `Minutes so far: ${m.walk ?? 0} ${w.walk}, ${m.still ?? 0} ${w.still}, ${m.shake ?? 0} ${w.shake}.`,
     `Current sitting streak: ${pet.stillStreakMinutes ?? 0} minutes.`,
@@ -50,7 +50,7 @@ function facts(pet) {
 
 export function dexPrompt(pet) {
   const { mode, text } = facts(pet);
-  return `Write the Pengbit Index entry for this Pengbit, as if reading from your field notes.
+  return `Write the Pebblebit Index entry for this Pebblebit, as if reading from your field notes.
 3 or 4 sentences, 45 to 70 words. Name its form, describe one fun, made-up trait that follows from how its owner ${mode === 'desk' ? 'sat and took breaks while studying' : 'has been moving'}, and quote exactly one real number from the facts below (for example "412 minutes of waddling"). Start with "Field notes:".
 
 ${text}`;
@@ -58,11 +58,11 @@ ${text}`;
 
 const SITUATIONS = {
   nudge: (mode) => mode === 'desk'
-    ? 'The owner has been sitting at the desk a long time and Pengbit just started shivering. Invite them to stand up and step away from the screen for a couple of minutes, kindly, no guilt.'
-    : 'The owner has been sitting still a long time and Pengbit just started shivering. Encourage a short walk right now, kindly, no guilt.',
+    ? 'The owner has been sitting at the desk a long time and Pebblebit just started shivering. Invite them to stand up and step away from the screen for a couple of minutes, kindly, no guilt.'
+    : 'The owner has been sitting still a long time and Pebblebit just started shivering. Encourage a short walk right now, kindly, no guilt.',
   moved: () => 'The owner just got up after a sitting nudge. Celebrate briefly and mention how many nudges they have answered.',
   checkin: () => 'The owner asked how they are doing. Give a quick personal check-in on their numbers and one small, concrete suggestion.',
-  slouch: () => 'Desk mode: the owner has been slouching for a while and Pengbit is glitching. Give one gentle, specific posture cue (for example shoulders back and down, feet flat, screen at eye level). Playful, never scolding. One sentence, under 25 words.',
+  slouch: () => 'Desk mode: the owner has been slouching for a while and Pebblebit is glitching. Give one gentle, specific posture cue (for example shoulders back and down, feet flat, screen at eye level). Playful, never scolding. One sentence, under 25 words.',
   exercise: () => 'The owner just finished a camera-verified exercise break (for example squats or an overhead stretch). Cheer them on and mention the rep count if it is in the facts.',
 };
 

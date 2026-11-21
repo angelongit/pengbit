@@ -1,4 +1,4 @@
-// Pengbit Flock: federated averaging math. Pure functions, shared by the phone and the server.
+// Pebblebit Flock: federated averaging math. Pure functions, shared by the phone and the server.
 // No DOM, no raw data: everything here works on model weights and summary statistics only.
 //
 // The activity MLP standardizes its 12 input features with (f - mu) / sd before the first layer.

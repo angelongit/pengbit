@@ -107,7 +107,7 @@ export class MLP {
   }
 
   // data: [{f, label}] -> trains in place. Returns {trainAcc, valAcc, confusion, nTrain, nVal}.
-  // warm: keep the current weights and mu/sd and fine-tune them (Pengbit Flock local update).
+  // warm: keep the current weights and mu/sd and fine-tune them (Pebblebit Flock local update).
   train(data, { epochs = 400, lr = 0.02, l2 = 1e-3, valFrac = 0.2, onEpoch, warm = false } = {}) {
     // Stratified shuffle split.
     const train = [], val = [];

@@ -1,4 +1,4 @@
-// Pengbit Flock: federated learning server.
+// Pebblebit Flock: federated learning server.
 // Phones train the activity model on their own motion and POST only model weights, a sample count
 // and feature averages. This endpoint averages them (FedAvg) into a global model and serves it back.
 // It never receives raw motion data.
@@ -31,7 +31,7 @@ const FORMS = ['egg', 'baby', 'sprinter', 'frost', 'glitch'];
 function cleanClient(c = {}) {
   const id = str(c.id, 40).replace(/\s/g, '');
   if (id.length < 6) return null;
-  return { id, name: str(c.name, 14) || 'Pengbit', form: FORMS.includes(c.form) ? c.form : 'baby', sim: !!c.sim };
+  return { id, name: str(c.name, 14) || 'Pebblebit', form: FORMS.includes(c.form) ? c.form : 'baby', sim: !!c.sim };
 }
 
 function touch(doc, c) {

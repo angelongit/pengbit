@@ -58,7 +58,7 @@ export function cleanPet(p = {}) {
   const str = (v, n = 24) => String(v ?? '').replace(/[^\w .'-]/g, '').slice(0, n);
   const m = p.minutes || {};
   return {
-    name: str(p.name) || 'Pengbit', form: str(p.form, 10), formName: str(p.formName, 30),
+    name: str(p.name) || 'Pebblebit', form: str(p.form, 10), formName: str(p.formName, 30),
     ageMinutes: num(p.ageMinutes), happiness: num(p.happiness), energy: num(p.energy),
     minutes: { walk: num(m.walk), still: num(m.still), shake: num(m.shake) },
     stillStreakMinutes: num(p.stillStreakMinutes), nudges: num(p.nudges), nudgesAnswered: num(p.nudgesAnswered),

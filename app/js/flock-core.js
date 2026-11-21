@@ -1,4 +1,4 @@
-// Pengbit Flock, client side: local training, federated evaluation and the upload format.
+// Pebblebit Flock, client side: local training, federated evaluation and the upload format.
 // Used by the phone (flock-ui.js) and by the simulated penguins on the Flock screen.
 import { MLP, ACTS } from './activity.js';
 import { featureStats } from './fedavg.js';

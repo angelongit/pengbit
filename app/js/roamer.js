@@ -1,9 +1,9 @@
-// Roaming Pengbit engine: a Clippy-style penguin that walks around a full-screen layer, hops,
+// Roaming Pebblebit engine: a Clippy-style penguin that walks around a full-screen layer, hops,
 // chases your cursor, naps, nags you about posture and long sits, and can be picked up and thrown.
 //
 // Used in two places:
 //   - roam.html, loaded by the desktop companion (desktop/) in a transparent always-on-top window,
-//     so Pengbit walks over every other app on the real desktop.
+//     so Pebblebit walks over every other app on the real desktop.
 //   - js/roam.js, the in-page fallback: the same penguin roams over the web app itself.
 //
 // createRoamer(root, opts) -> { setState(snap), say(text, opts), setCursor(x, y), destroy() }
@@ -21,7 +21,7 @@ const GRAVITY = 2200;                    // px/s^2
 const TIPS = [
   'Professor Liveoak says: stand up and stretch for a minute!',
   'Roll your shoulders back. Your spine will thank you.',
-  'Water break? Pengbit is thirsty too.',
+  'Water break? Pebblebit is thirsty too.',
   'Look 20 feet away for 20 seconds. Eyes need recess.',
   'A 5 minute walk resets your focus. Science!',
   'Feet flat, screen at eye level. Professor\'s orders.',
@@ -246,7 +246,7 @@ export function createRoamer(root, opts = {}) {
   function chatter(now) {
     if (now < nextChatter || now < bubbleUntil) return;
     nextChatter = now + rnd(25000, 50000);
-    if (snap.dead) return say(`${snap.name || 'Pengbit'} watches over you now.`);
+    if (snap.dead) return say(`${snap.name || 'Pebblebit'} watches over you now.`);
     if (snap.isEgg) return say('*wobble wobble*', { ms: 2000 });
     if (snap.hungry) return say('hungry... (press A to feed me)');
     if (snap.sad) return say('play with me? :(');
@@ -304,7 +304,7 @@ export function createRoamer(root, opts = {}) {
   el.addEventListener('pointerup', release);
   el.addEventListener('pointercancel', release);
 
-  // ---- tombstones of past Pengbits, standing along the floor behind the new one
+  // ---- tombstones of past Pebblebits, standing along the floor behind the new one
   const graveEls = [];
   function drawGraves() {
     graveEls.splice(0).forEach((g) => g.remove());
@@ -343,7 +343,7 @@ export function createRoamer(root, opts = {}) {
       snap = { ...snap, ...s };
       if (s.posture === 'slouch' || (s.mode === 'desk' && s.act === 'shake')) slouchSince ||= performance.now(); else slouchSince = 0;
       if (was.dead && !snap.dead) { mode = 'fall'; }
-      if (!was.dead && snap.dead) { mode = 'ghost'; say(`${snap.name || 'Pengbit'}... :(`); }
+      if (!was.dead && snap.dead) { mode = 'ghost'; say(`${snap.name || 'Pebblebit'}... :(`); }
       if (was.isEgg && !snap.isEgg) { hop(1.2); say('hi!! I hatched!'); }
       if (first || String(was.graves) !== String(snap.graves)) drawGraves();
       if (was.form && snap.form && was.form !== snap.form && !was.isEgg && !snap.isEgg && snap.form !== 'baby') { hop(1.5); say('I evolved!!!'); }
