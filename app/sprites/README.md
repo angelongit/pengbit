@@ -10,6 +10,7 @@ firmware's 1-bit placeholders (`js/sprites-builtin.js`).
 | `sprinter_a.png`, `sprinter_b.png` | evolved from walking (phone) or taking breaks (desk) |
 | `frost_a.png`, `frost_b.png` | evolved from sitting still (phone) or sitting upright (desk) |
 | `glitch_a.png`, `glitch_b.png` | evolved from shaking (phone) or slouching (desk) |
+| `scholar_*`, `hunchling_*`, `trail_mage_*`, `library_sage_*`, `static_mage_*` (`_a`/`_b`) | study evolutions from `ws/evolutions-recap` |
 | `slouch_a.png`, `slouch_b.png` | Desk mode reaction while the owner slouches (shown by the floating window, `js/pip.js`) |
 | `professor.png` | Professor Liveoak's portrait (loaded by `main.js`, falls back to the inline 16x16 face) |
 
