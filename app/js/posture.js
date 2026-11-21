@@ -1,10 +1,11 @@
 // app/js/posture.js
 // W5: Desk mode posture feature extraction, threshold classifier, and MLP wrapper
 
-import { MLP } from './activity.js';
+import { ACTS, MLP } from './activity.js';
 import { LM } from './pose.js';
 
 export const POSTURE_N_IN = 8;
+export const POSTURE_WINDOW_MS = 2200;
 
 // Map pet slots <-> desk labels
 export const SLOT_TO_DESK = { walk: 'away', still: 'upright', shake: 'slouch' };
@@ -266,6 +267,36 @@ export function evaluateModels(samples, mlp) {
   };
 }
 
+export function isPostureSample(sample) {
+  return SLOTS.includes(sample?.y) && Array.isArray(sample.x)
+    && sample.x.length === POSTURE_N_IN && sample.x.every(Number.isFinite);
+}
+
+export function trainPostureModel(samples) {
+  const rows = samples.filter(isPostureSample);
+  const people = [...new Set(rows.map(s => s.person || 'person1'))];
+  const heldOut = people.length > 1 ? people.at(-1) : null;
+  const train = [], test = [];
+  for (const label of SLOTS) {
+    const group = rows.filter(s => s.y === label);
+    if (heldOut) {
+      train.push(...group.filter(s => (s.person || 'person1') !== heldOut));
+      test.push(...group.filter(s => (s.person || 'person1') === heldOut));
+    } else {
+      // Keep the latest windows of each posture for a quick single-person check.
+      const cut = Math.floor(group.length * 0.8);
+      train.push(...group.slice(0, cut));
+      test.push(...group.slice(cut));
+    }
+    if (train.filter(s => s.y === label).length < 5 || !test.some(s => s.y === label)) {
+      throw new Error(`Record more ${SLOT_TO_DESK[label]} windows in both the training and test sets.`);
+    }
+  }
+  const model = createPostureMLP();
+  model.train(train.map(({ x, y }) => ({ f: x, label: y })), { valFrac: 0 });
+  return { model, heldOut, trainCount: train.length, evaluation: evaluateModels(test, model) };
+}
+
 /**
  * PostureDetector: implements the ctx.setActivitySource(src) contract.
  * Maintains a 2s sliding window, classifies every 1s with 3-window majority vote.
@@ -288,6 +319,7 @@ export class PostureDetector {
 
   setBaseline(baseline) {
     this.baseline = baseline;
+    this.reset();
   }
 
   setModel(mlp) {
@@ -296,6 +328,7 @@ export class PostureDetector {
 
   setUseML(flag) {
     this.useML = !!flag;
+    this.votes = [];
   }
 
   pushFrame({ landmarks, t, present }) {
@@ -304,7 +337,7 @@ export class PostureDetector {
     this.buffer.push({ t: now, present: !!present && !!metrics, metrics });
 
     // Trim to last 2.2s
-    const cutoff = now - 2200;
+    const cutoff = now - POSTURE_WINDOW_MS;
     while (this.buffer.length > 0 && this.buffer[0].t < cutoff) {
       this.buffer.shift();
     }
@@ -372,4 +405,17 @@ export class PostureDetector {
 
 export function createPostureMLP(weights = null) {
   return new MLP(weights || null, { nIn: POSTURE_N_IN });
+}
+
+export function loadPostureModel(weights) {
+  if (weights?.nIn !== POSTURE_N_IN || !(weights.stats?.nTrain > 0)) return null;
+  const vector = (v, n) => Array.isArray(v) && v.length === n && v.every(Number.isFinite);
+  const matrix = (m, rows, cols) => Array.isArray(m) && m.length === rows && m.every(row => vector(row, cols));
+  const { nIn, nH, nOut, W1, W2, b1, b2, mu, sd, labels } = weights;
+  if (!Number.isInteger(nH) || nH < 1 || nOut !== SLOTS.length
+    || !Array.isArray(labels) || labels.length !== ACTS.length || !ACTS.every((label, i) => labels[i] === label)
+    || !matrix(W1, nH, nIn) || !matrix(W2, nOut, nH)
+    || !vector(b1, nH) || !vector(b2, nOut)
+    || !vector(mu, nIn) || !vector(sd, nIn) || sd.some(v => v <= 0)) return null;
+  return createPostureMLP(weights);
 }
