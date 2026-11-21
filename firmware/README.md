@@ -21,6 +21,7 @@ If upload fails, double-tap the reset button to enter the bootloader and try aga
 
 | Sketch | Checks |
 |---|---|
+| `tests/bench_test` | **Start here.** Every part one at a time from a Serial Monitor menu. Wiring guide in its README |
 | `tests/oled_test` | OLED wiring and I2C address |
 | `tests/io_test` | Buttons A/B/C and the buzzer |
 | `tests/imu_test` | IMU readings and motion magnitude on serial |

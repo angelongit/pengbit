@@ -5,9 +5,10 @@ const FEATURES = [
   './flock.js',         // W1 Pengbit Flock
   './exercise.js',      // W2 Camera-verified exercise
   // './insights.js',   // W3 Predictive nudges + weekly report
-  // './talk.js',       // W4 Talk to Professor Floe
-  // './desk.js',       // W5 Desk mode (posture)
+  './talk.js',          // W4 Talk to Professor Floe
+  './desk.js',          // W5 Desk mode (posture)
   // './campus.js',     // W9 Campus wellness dashboard
+  './pip.js',           // W6 Floating window (Daniel)
 ];
 
 export async function initFeatures(ctx) {
