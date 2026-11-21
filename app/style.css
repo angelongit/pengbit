@@ -191,3 +191,18 @@ code { font-size: 12px; }
   background: #fff; color: #1b1442; font-weight: 700; padding: 10px 16px; border-radius: 99px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); z-index: 30; max-width: calc(100% - 32px); text-align: center;
 }
+
+
+/* W8 polish pass: clearer TIDAL-blue hierarchy, tactile bevels, and small-screen comfort. */
+:root { --bg1:#071c38; --bg2:#123d70; --plastic:rgba(55,190,255,.30); --plastic-edge:rgba(177,239,255,.86); --line:rgba(165,225,255,.24); --panel:rgba(8,30,62,.52); }
+body { background:radial-gradient(100% 50% at 8% 0%,rgba(65,205,255,.30),transparent 68%),radial-gradient(80% 55% at 100% 12%,rgba(121,91,255,.25),transparent 65%),linear-gradient(165deg,#071c38 0%,#123d70 58%,#251b58 100%); }
+.device { border-color:rgba(198,247,255,.9); background:radial-gradient(65% 38% at 28% 12%,rgba(255,255,255,.66),transparent 62%),linear-gradient(145deg,rgba(116,224,255,.52),rgba(30,104,191,.36)); box-shadow:inset 3px 3px 0 rgba(255,255,255,.30),inset 0 -14px 28px rgba(0,35,100,.48),0 18px 42px rgba(0,0,0,.42); }
+.screen { border-color:#071b2b; box-shadow:inset 0 0 0 1px #72c9df,inset 0 0 20px #000b,0 3px 0 rgba(255,255,255,.18); }
+.band { background:linear-gradient(90deg,#8deeff,#b5f5ff 55%,#72c7ff); color:#06294a; }
+.tabs { border-color:rgba(159,243,255,.35); background:rgba(5,22,48,.55); }
+.tabs button.on { background:linear-gradient(180deg,#fff,#c7f6ff 48%,#79c9f5); color:#092b4c; box-shadow:inset 1px 1px 0 #fff,0 2px 0 #18538a; }
+.panel,.now>div { border-color:rgba(159,243,255,.28); background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(7,28,58,.50)); box-shadow:inset 1px 1px 0 rgba(255,255,255,.08); }
+.btn-chrome { background:linear-gradient(180deg,#fff 0%,#c9f6ff 46%,#78c9f4 52%,#e8faff 100%); color:#082b4b; border-color:#f4ffff; box-shadow:0 3px 0 #15528d,0 5px 10px #0003; }
+.hw b { background:radial-gradient(circle at 34% 25%,#fff 0%,#b8f5ff 30%,#42b8f5 72%,#1269ae 100%); color:#073253; box-shadow:0 4px 0 #084b80,0 6px 12px #0005; }
+@media(max-width:380px){.app{padding-left:10px;padding-right:10px}.device{padding:18px 14px 18px}.hw b{width:48px;height:48px}.tabs button{font-size:12px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
