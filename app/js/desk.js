@@ -361,7 +361,8 @@ export function init(ctx) {
     }
 
     const model = createPostureMLP();
-    model.train(trainSet);
+    // Recorded samples are { x, y }; MLP.train expects { f, label } (same slot names).
+    model.train(trainSet.map((s) => ({ f: s.x, label: s.y })));
     mlp = model;
     detector.setModel(mlp);
     detector.setUseML(true);
