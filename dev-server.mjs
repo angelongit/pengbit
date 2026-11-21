@@ -6,17 +6,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const ROOT = path.dirname(fileURLToPath(import.meta.url));
+// Repo root: the folder holding app/. Prefer this script's folder, then the current folder.
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = [HERE, process.cwd()].find((d) => fs.existsSync(path.join(d, 'app', 'index.html'))) || HERE;
 const APP = path.join(ROOT, 'app');
 const PORT = Number(process.env.PORT || 3000);
 
 // ---- .env.local / .env (simple KEY=value lines; existing env wins)
 // Also accepts .env.local.txt, which Windows Notepad creates when "Save as type" is left on Text Documents.
 const envFiles = [];
-for (const name of ['.env.local', '.env.local.txt', '.env', '.env.txt']) {
-  const file = path.join(ROOT, name);
+for (const name of ['.env.local', '.env.local.txt', '.env', '.env.txt']) for (const dir of [...new Set([ROOT, process.cwd()])]) {
+  const file = path.join(dir, name);
   if (!fs.existsSync(file)) continue;
-  envFiles.push(name);
+  envFiles.push(path.join(dir, name));
   for (const line of fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '').split(/\r?\n/)) {
     const m = line.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
     if (!m || process.env[m[1]] !== undefined) continue;
@@ -88,6 +90,7 @@ http.createServer((req, res) => {
   serveStatic(req, res, url);
 }).listen(PORT, () => {
   console.log(`\nPengbit running at http://localhost:${PORT}\n`);
+  console.log(`  app folder: ${APP}${fs.existsSync(path.join(APP, 'index.html')) ? '' : '  (NOT FOUND: run this from the pengbit repo folder)'}`);
   console.log(`  key file: ${envFiles.length ? envFiles.join(', ') : 'NONE FOUND in ' + ROOT}`);
   const has = (k) => (process.env[k] ? 'set' : 'MISSING');
   console.log(`  ELEVENLABS_API_KEY  ${has('ELEVENLABS_API_KEY')}`);
