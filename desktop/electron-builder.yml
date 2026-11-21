@@ -1,0 +1,25 @@
+appId: edu.pebblebit.desktop
+productName: Pebblebit
+electronVersion: 33.2.1
+asar: false
+npmRebuild: false
+directories:
+  app: .
+  output: dist-desktop
+extraMetadata:
+  main: desktop/main.cjs
+  version: 1.0.0
+  description: Portable Pebblebit desktop companion
+  author: Pebblebit team
+files:
+  - app/**
+  - desktop/main.cjs
+  - desktop/preload.cjs
+  - desktop/icon.png
+  - dev-server.mjs
+  - '!**/.env*'
+win:
+  target: portable
+  signAndEditExecutable: false
+portable:
+  artifactName: Pebblebit-${arch}.exe

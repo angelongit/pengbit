@@ -1,6 +1,10 @@
 # Pebblebit on your desktop
 
-A Clippy-style desktop companion. Pebblebit leaves the browser and walks around on top of every other
+A Clippy-style desktop companion. Pebblebit starts docked in the bottom-right corner. The compact
+assistant shows the current pet, Desk posture, break reminders, and Professor Liveoak's text.
+Use the tray menu to switch to Roam, hide the assistant, or bring it back.
+
+In Roam mode, Pebblebit walks around on top of every other
 window: along the bottom of the screen (on the taskbar/dock edge), hopping, dashing (Sprinter), belly-sliding
 (Frost), teleporting (Glitch), napping when tired, and walking over to your cursor to nag you.
 
@@ -13,26 +17,38 @@ window: along the bottom of the screen (on the taskbar/dock edge), hopping, dash
 
 ## Run it
 
-You need Node 18+ (same as the local server).
+Double-click the Windows portable executable to open Pebblebit. It starts its own loopback
+server and brings up the main window and dock. To enable live voice and generated entries,
+place your own `.env.local` beside the executable. The executable contains no API keys.
+The portable app uses its own local app address and profile. Saved pets and models from another
+browser or from the development server remain in their original profile.
+
+For development, you need Node 18+.
 
 ```bash
-# terminal 1, repo root: the Pebblebit app + API on http://localhost:3000
+# repo root: install the API dependencies
 npm install
-npm run local
 
-# terminal 2
 cd desktop
 npm install      # first time only, downloads Electron (~100 MB)
 npm start
 ```
 
-Two things open: the normal Pebblebit app window (wake it, hatch it, use Desk mode there) and an invisible
-full-screen layer where Pebblebit roams. Minimize the app window if you like; the pet keeps running.
+Two things open: the normal Pebblebit app window (wake it, hatch it, use Desk mode there) and the
+bottom-right assistant. Minimize the app window if you like; the pet keeps running.
 
-- **ROAM / CATCH** button (top left of the pet screen) or the tray icon turns roaming on and off.
+- **ROAM / CATCH** switches between the docked assistant and roaming. The tray also offers **Hide assistant**.
 - Use the deployed site instead of the local server: `npm run vercel`, or `npm start -- --url=https://pengbit.vercel.app`
-  (or set `PENGBIT_URL`). The event Wi-Fi breaks TLS to vercel.app, so the local server is the default.
+  (or set `PENGBIT_URL`). To use a manually started local server, pass its URL the same way.
 - Closing the app window quits everything.
+
+To build the portable executable on Windows, run this from the repo root after installing dependencies:
+
+```powershell
+npm exec --yes --package=electron-builder@26.18.0 -- electron-builder --win portable --x64 --config desktop/electron-builder.yml
+```
+
+The build goes in `dist-desktop/`.
 
 ## No desktop app? (fallback)
 
@@ -41,8 +57,8 @@ behaviour. `roam.html` opened in a second tab of the same browser is a preview o
 
 ## How it works
 
-- `main.cjs` opens the app window and a transparent, frameless, always-on-top, non-focusable window covering the
-  primary screen's work area that loads `/roam.html`. It sends the cursor position to that page 30 times a second; when
+- `main.cjs` opens the app and positions the docked `/dock.html` window within the display's work area.
+  Roam uses a transparent, non-focusable window that loads `/roam.html`. It sends the cursor position to that page 30 times a second; when
   the cursor is over the penguin the page turns click-through off (`setIgnoreMouseEvents`) so you can grab it.
 - Both windows load the same origin, so `app/js/roam.js` streams the pet's state (form, mood, posture, shivering, name,
   graveyard) and the professor's lines over `BroadcastChannel('pengbit-roam')`. The engine is `app/js/roamer.js`.
