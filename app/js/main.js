@@ -192,6 +192,14 @@ function renderStatus() {
   // health
   const t = pet.totals, sum = t.walk + t.still + t.shake || 1;
   $('hStreak').textContent = fmtMin(pet.stillStreak);
+  const nudgeSeconds = Math.max(0, Math.ceil((pet.nextNudgeAt - pet.stillStreak) / (settings.demo ? CFG.DEMO_SPEEDUP : 1)));
+  let nudgeEta = nudgeSeconds < 120 ? `${nudgeSeconds} s` : `${Math.ceil(nudgeSeconds / 60)} min`;
+  if (settings.demo) nudgeEta += ' (demo)';
+  if (pet.isEgg) nudgeEta = 'After hatching';
+  else if (pet.nudged) nudgeEta = pet.mode === 'desk' ? 'Step away for a break' : 'Take a movement break';
+  else if (a.act === 'walk') nudgeEta = 'Starts when you sit';
+  else if (pet.mode !== 'desk' && a.act === 'shake') nudgeEta = 'Paused while shaking';
+  $('hNudgeEta').textContent = nudgeEta;
   $('hNudges').textContent = `${pet.nudgesAnswered} / ${pet.nudges}`;
   $('hRate').textContent = pet.nudges ? Math.round(pet.nudgesAnswered / pet.nudges * 100) + '%' : 'n/a';
   $('hWalk').textContent = fmtMin(t.walk); $('hStill').textContent = fmtMin(t.still); $('hShake').textContent = fmtMin(t.shake);
