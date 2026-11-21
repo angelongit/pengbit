@@ -109,7 +109,7 @@ def slouch(f):
     return out
 
 def professor():
-    # Professor Floe: older penguin researcher with round glasses, white whiskery brows, lab-coat collar, bow tie.
+    # Professor Liveoak: older penguin researcher with round glasses, white whiskery brows, lab-coat collar, bow tie.
     g, cy = penguin(w=11.0, h=12.5, tuft=False)
     ey = cy - 3
     for x0 in (10, 18):                                    # round glasses around the eyes

@@ -1,4 +1,4 @@
-// W4: push-to-talk conversation with Professor Floe.
+// W4: push-to-talk conversation with Professor Liveoak.
 // The browser receives only a short-lived signed URL; ELEVENLABS_API_KEY stays server-side.
 const SDK_URL = 'https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.37.1/+esm';
 const TOKEN_URL = '/api/talk-token';
@@ -12,8 +12,8 @@ export async function init(ctx) {
   tab.innerHTML = `
     <div class="talk-head">
       <div class="talk-orb" aria-hidden="true">❄</div>
-      <div><p class="talk-kicker">FIELD RADIO // 01</p><h2>Talk to Professor Floe</h2>
-      <p class="muted">Hold the button while you speak. Release to let Floe answer.</p></div>
+      <div><p class="talk-kicker">FIELD RADIO // 01</p><h2>Talk to Professor Liveoak</h2>
+      <p class="muted">Hold the button while you speak. Release to let Liveoak answer.</p></div>
     </div>
     <div class="talk-status" role="status" aria-live="polite">Checking voice link…</div>
     <button class="talk-ptt" type="button" disabled>
@@ -22,7 +22,7 @@ export async function init(ctx) {
     </button>
     <div class="talk-transcript" aria-live="polite"><p class="talk-empty">Your conversation will appear here.</p></div>
     <button class="talk-end btn-ghost" type="button" hidden>End conversation</button>
-    <p class="talk-foot">Audio is sent to ElevenLabs during the live conversation. Your pet’s current stats are shared so Floe can answer with context.</p>`;
+    <p class="talk-foot">Audio is sent to ElevenLabs during the live conversation. Your pet’s current stats are shared so Liveoak can answer with context.</p>`;
 
   const status = tab.querySelector('.talk-status');
   const ptt = tab.querySelector('.talk-ptt');
@@ -49,7 +49,7 @@ export async function init(ctx) {
     const line = document.createElement('p');
     line.className = 'talk-line ' + who;
     const label = document.createElement('b');
-    label.textContent = who === 'floe' ? 'PROF. FLOE' : 'YOU';
+    label.textContent = who === 'liveoak' ? 'PROF. LIVEOAK' : 'YOU';
     const body = document.createElement('span');
     body.textContent = clean;
     line.append(label, body);
@@ -90,12 +90,12 @@ export async function init(ctx) {
     const text = typeof message === 'string' ? message : message.message || message.text || '';
     if (!text) return;
     const source = String(message.source || message.role || message.type || '').toLowerCase();
-    addLine(source === 'user' || source === 'user_transcript' ? 'you' : 'floe', text);
+    addLine(source === 'user' || source === 'user_transcript' ? 'you' : 'liveoak', text);
   }
   async function start() {
     if (conversation) {
       conversation.setMicMuted(false);
-      setStatus('Listening. Release to let Professor Floe respond.', 'live');
+      setStatus('Listening. Release to let Professor Liveoak respond.', 'live');
       return;
     }
     if (starting || failed) return;
@@ -124,7 +124,7 @@ export async function init(ctx) {
       end.hidden = false;
       ptt.disabled = false;
       if (!held) conversation.setMicMuted(true);
-      else { conversation.setMicMuted(false); setStatus('Listening. Release to let Professor Floe respond.', 'live'); }
+      else { conversation.setMicMuted(false); setStatus('Listening. Release to let Professor Liveoak respond.', 'live'); }
     } catch (error) {
       console.warn('[talk] session failed', error);
       conversation = null;
@@ -142,7 +142,7 @@ export async function init(ctx) {
     ptt.classList.remove('is-live');
     if (!conversation) return;
     conversation.setMicMuted(true);
-    setStatus('Floe is listening. Hold again when you are ready to speak.', 'live');
+    setStatus('Liveoak is listening. Hold again when you are ready to speak.', 'live');
   }
   ptt.addEventListener('pointerdown', (event) => {
     event.preventDefault();
