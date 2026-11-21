@@ -4,6 +4,7 @@ const CACHE = 'pengbit-v3';
 const SHELL = ['./', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/main.js', 'js/pet.js', 'js/activity.js', 'js/pose.js', 'js/sprites.js', 'js/sprites-builtin.js', 'js/audio.js', 'js/ai.js',
   'js/bus.js', 'js/ctx.js', 'js/features.js',
+  'js/flock.js', 'js/flock-core.js', 'js/fedavg.js', 'flock.html', 'js/flock-screen.js', 'js/flock-sim.js', 'js/vendor/qrcode.js', 'css/flock-screen.css',
   'css/flock.css', 'css/move.css', 'css/insights.css', 'css/talk.css', 'css/desk.css', 'css/campus.css',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
