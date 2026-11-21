@@ -11,6 +11,7 @@ import { createRoamer, loadSprites } from './roamer.js';
 const CH = 'pengbit-roam';
 let ctx = null, chan = null, roamer = null, layer = null;
 let posture = null, dead = false;
+let dockWatchingUntil = 0;
 const desktop = typeof window !== 'undefined' ? window.pengbitDesktop : null;   // set by desktop/preload.cjs
 
 function snapshot() {
@@ -40,9 +41,20 @@ export async function init(c) {
       const m = e.data || {};
       if (m.type === 'poke') poke();
       else if (m.type === 'hello') send({ type: 'state', state: snapshot() });
+      else if (m.type === 'dock:watch') dockWatchingUntil = performance.now() + 4000;
     };
   }
   setInterval(() => send({ type: 'state', state: snapshot() }), 500);
+  if (desktop && chan) {
+    const scene = document.getElementById('scene');
+    const graphics = scene?.getContext('2d');
+    // Mirror just the game's pixel canvas, and only while the dock is listening.
+    if (graphics) setInterval(() => {
+      if (performance.now() >= dockWatchingUntil) return;
+      const pixels = graphics.getImageData(0, 0, scene.width, scene.height);
+      chan.postMessage({ type: 'dock:scene', pixels });
+    }, 100);
+  }
 
   const bus = ctx.bus;
   if (bus) {

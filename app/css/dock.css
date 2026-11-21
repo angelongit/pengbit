@@ -9,7 +9,7 @@ button:active { border-style: inset; }
 button:focus-visible { outline: 2px solid #e29919; outline-offset: 1px; }
 header button { width: 23px; height: 22px; font-size: 17px; line-height: 1; }
 .pet { display: flex; align-items: center; gap: 9px; margin: 6px 0; padding: 3px 8px; background: #0d2a36; color: #d0f6ff; border: 2px inset #8196a8; min-height: 58px; }
-.pet canvas { flex: none; width: 48px; height: 48px; image-rendering: pixelated; }
+.pet canvas { flex: none; width: 96px; height: 64px; image-rendering: pixelated; }
 .pet div { min-width: 0; }
 .pet strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pet p { margin: 0; font-size: 12px; }

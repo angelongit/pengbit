@@ -7,7 +7,7 @@ const status = document.getElementById('state');
 const message = document.getElementById('message');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const postureLabels = { upright: 'Sitting upright', slouch: 'Slouch detected', away: 'Away from desk' };
-let state, lastSeen;
+let state, lastSeen, lastScene;
 let messageUntil = 0;
 let ready = false;
 
@@ -29,11 +29,11 @@ function draw(now) {
       setText(message, state.shivering ? prompt : 'Joy ' + (state.happy ?? '—') + ' · Energy ' + (state.energy ?? '—'));
     }
   }
-  if (ready) {
+  if (ready && (!lastScene || Date.now() - lastScene > 1500)) {
     const frame = !motion.matches && Math.floor(now / 530) % 2;
     const art = sprite(fresh ? state.form : 'egg', frame) || sprite('baby', frame);
-    graphics.clearRect(0, 0, 32, 32);
-    if (art) graphics.drawImage(art, 0, 0, 32, 32);
+    graphics.clearRect(0, 0, 96, 64);
+    if (art) graphics.drawImage(art, 32, 16, 32, 32);
   }
 }
 
@@ -49,6 +49,12 @@ if ('BroadcastChannel' in window) {
     if (data?.type === 'state' && data.state) {
       state = data.state;
       lastSeen = Date.now();
+    } else if (data?.type === 'dock:scene' && data.pixels instanceof ImageData
+      && data.pixels.width === 96 && data.pixels.height === 64) {
+      if (!motion.matches || !lastScene || Date.now() - lastScene >= 1000) {
+        graphics.putImageData(data.pixels, 0, 0);
+        lastScene = Date.now();
+      }
     } else if (data?.type === 'say' && typeof data.text === 'string' && data.text.trim()) {
       setText(message, (data.who === 'prof' ? 'Liveoak: ' : '') + data.text);
       message.scrollTop = 0;
@@ -57,7 +63,10 @@ if ('BroadcastChannel' in window) {
     draw(performance.now());
   };
   channel.postMessage({ type: 'hello' });
-  window.addEventListener('pagehide', () => channel.close(), { once: true });
+  const requestScene = () => channel.postMessage({ type: 'dock:watch' });
+  requestScene();
+  const watch = setInterval(requestScene, 1500);
+  window.addEventListener('pagehide', () => { clearInterval(watch); channel.close(); }, { once: true });
 }
 setInterval(() => draw(performance.now()), 250);
 loadSprites().then(() => { ready = true; draw(performance.now()); });
