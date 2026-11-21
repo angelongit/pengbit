@@ -1,8 +1,8 @@
-// Pengbit's floating window (Daniel, W6): a Y2K mini window that stays on top of your homework,
+// Pebblebit's floating window (Daniel, W6): a Y2K mini window that stays on top of your homework,
 // using Chrome's Document Picture-in-Picture API. Shows the pet, its stats and posture, and
 // Professor Liveoak's lines in a Clippy-style speech bubble.
 // If Picture-in-Picture isn't available (Safari, Firefox, phones), the button never appears and
-// Pengbit simply stays in the normal tab.
+// Pebblebit simply stays in the normal tab.
 //
 // Talks to the app only through the seam: ctx (pet, getActivity, toast) and bus events
 // (pet:*, desk:posture, mode:changed). Exposes ctx.pip = { open, close, isOpen } so other
@@ -47,7 +47,7 @@ function addLaunchButton() {
   b.id = 'pipLaunch';
   b.className = 'pip-launch';
   b.type = 'button';
-  b.title = 'Float Pengbit over your other windows';
+  b.title = 'Float Pebblebit over your other windows';
   b.textContent = 'FLOAT';
   b.onclick = () => (win ? close() : open());
   Object.assign(b.style, {
@@ -62,13 +62,13 @@ function addLaunchButton() {
 
 // ------------------------------------------------------------ open / close
 export async function open() {
-  if (!SUPPORTED) { ctx?.toast?.('The floating window needs Chrome on a laptop. Pengbit stays here.'); return false; }
+  if (!SUPPORTED) { ctx?.toast?.('The floating window needs Chrome on a laptop. Pebblebit stays here.'); return false; }
   if (win) { win.focus(); return true; }
   try {
     win = await window.documentPictureInPicture.requestWindow({ width: 280, height: 330 });
   } catch (e) {
     console.warn('[pip] could not open', e);
-    ctx?.toast?.('Could not open the floating window. Pengbit stays here.');
+    ctx?.toast?.('Could not open the floating window. Pebblebit stays here.');
     win = null;
     return false;
   }
@@ -76,7 +76,7 @@ export async function open() {
   link.rel = 'stylesheet';
   link.href = new URL('../css/pip.css', import.meta.url).href;
   win.document.head.appendChild(link);
-  win.document.title = 'Pengbit';
+  win.document.title = 'Pebblebit';
   build(win.document);
   win.addEventListener('pagehide', onClosed);
   ctx.pipOpen = true;
@@ -107,7 +107,7 @@ function onClosed() {
 function build(doc) {
   doc.body.innerHTML = `
   <div class="pip-window">
-    <div class="pip-titlebar"><span class="pip-icon"></span><span class="pip-title">PENGBIT.EXE</span>
+    <div class="pip-titlebar"><span class="pip-icon"></span><span class="pip-title">PEBBLEBIT.EXE</span>
       <span class="pip-btns"><b>_</b><b>&#9633;</b><b class="pip-x" title="Close">x</b></span></div>
     <div class="pip-screen">
       <canvas class="pip-scene" width="${W}" height="${H}"></canvas>
@@ -200,7 +200,7 @@ function render() {
   els.energy.style.width = pet.energy + '%';
   els.happy.classList.toggle('low', pet.happy < 20);
   els.energy.classList.toggle('low', pet.energy < 20);
-  els.name.textContent = (pet.name || 'Pengbit').toUpperCase();
+  els.name.textContent = (pet.name || 'Pebblebit').toUpperCase();
   els.streak.textContent = pet.isEgg ? 'hatching...' : `seated ${Math.floor((pet.stillStreak || 0) / 60)}m`;
   const conf = a.conf ? ` ${Math.round(a.conf * 100)}%` : '';
   els.chip.textContent = `${labels[a.act] || a.act || ''}${conf}`;

@@ -1,9 +1,9 @@
-// Pengbit desktop companion (Electron).
+// Pebblebit desktop companion (Electron).
 //
 // Two windows:
-//   app      the normal Pengbit web app (pet engine, Desk-mode webcam posture, Professor Liveoak).
+//   app      the normal Pebblebit web app (pet engine, Desk-mode webcam posture, Professor Liveoak).
 //   overlay  a transparent, frameless, always-on-top window over the whole screen that loads
-//            /roam.html. Pengbit walks along the bottom of the screen (on top of the taskbar/dock),
+//            /roam.html. Pebblebit walks along the bottom of the screen (on top of the taskbar/dock),
 //            hops, chases your cursor and nags you, over every other app. It is click-through
 //            everywhere except the penguin itself, so you can still use your computer.
 // Both load the same origin, so the app streams the pet's state to the overlay over BroadcastChannel.
@@ -26,7 +26,7 @@ let win = null, overlay = null, tray = null, cursorTimer = null, roaming = true;
 
 function failPage(url, err) {
   const html = `<body style="font:15px system-ui;background:#0d2a36;color:#e8f4ff;padding:30px">
-    <h2>Pengbit can't reach ${url}</h2><p>${err}</p>
+    <h2>Pebblebit can't reach ${url}</h2><p>${err}</p>
     <p>Start the local server first, in the repo root: <code>npm run local</code><br>
     Or run with another URL: <code>npm start -- --url=https://pengbit.vercel.app</code></p>
     <p>Retrying every 3 seconds...</p></body>`;
@@ -35,7 +35,7 @@ function failPage(url, err) {
 
 function createAppWindow() {
   win = new BrowserWindow({
-    width: 1100, height: 820, title: 'Pengbit', icon: path.join(__dirname, 'icon.png'),
+    width: 1100, height: 820, title: 'Pebblebit', icon: path.join(__dirname, 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), backgroundThrottling: false },
   });
   win.setMenuBarVisibility(false);
@@ -65,7 +65,7 @@ function createOverlay() {
   overlay.once('ready-to-show', () => { if (roaming) overlay.showInactive(); });
   overlay.on('closed', () => { overlay = null; });
 
-  // Feed the cursor position to the page so Pengbit can chase it and so the page knows when the
+  // Feed the cursor position to the page so Pebblebit can chase it and so the page knows when the
   // pointer is over the penguin (it then turns click-through off for that moment).
   clearInterval(cursorTimer);
   cursorTimer = setInterval(() => {
@@ -91,8 +91,8 @@ function setRoaming(on) {
 function updateTray() {
   if (!tray) return;
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Show Pengbit app', click: () => { win?.show(); win?.focus(); } },
-    { label: roaming ? 'Catch Pengbit (stop roaming)' : 'Let Pengbit roam', click: () => setRoaming(!roaming) },
+    { label: 'Show Pebblebit app', click: () => { win?.show(); win?.focus(); } },
+    { label: roaming ? 'Catch Pebblebit (stop roaming)' : 'Let Pebblebit roam', click: () => setRoaming(!roaming) },
     { type: 'separator' },
     { label: 'Quit', click: () => app.quit() },
   ]));
@@ -121,10 +121,10 @@ app.whenReady().then(() => {
 
   try {
     tray = new Tray(nativeImage.createFromPath(path.join(__dirname, 'icon.png')).resize({ width: 18, height: 18 }));
-    tray.setToolTip('Pengbit');
+    tray.setToolTip('Pebblebit');
     updateTray();
   } catch (e) { console.warn('tray unavailable', e.message); }
-  console.log(`Pengbit desktop: ${APP_URL}`);
+  console.log(`Pebblebit desktop: ${APP_URL}`);
 });
 
 app.on('window-all-closed', () => app.quit());

@@ -1,15 +1,15 @@
-// W8: three-screen first-run introduction. Ends at the existing Wake Pengbit action.
+// W8: three-screen first-run introduction. Ends at the existing Wake Pebblebit action.
 export async function init(ctx) {
   const start = document.getElementById('start');
   const inner = start?.querySelector('.start-inner');
   const wake = document.getElementById('startBtn');
   if (!start || !inner || !wake || ctx.store.get('onboarded', false)) return;
   const screens = [
-    { tag: '01 / MEET YOUR COMPANION', title: 'A penguin with a purpose', body: 'Pengbit is a tiny pixel penguin living in your handheld. It grows, changes, and reacts to the way you move through your day.', note: 'Your little friend is counting on you.' },
-    { tag: '02 / THE DAILY QUEST', title: 'Movement makes it thrive', body: 'Walks help Pengbit become a Sprinter. Long stretches of sitting shape a calm Frost. Shake events create a glitchy Glitch. When Pengbit nudges you, a short break helps.', note: 'Small breaks count. No perfect routine required.' },
+    { tag: '01 / MEET YOUR COMPANION', title: 'A penguin with a purpose', body: 'Pebblebit is a tiny pixel penguin living in your handheld. It grows, changes, and reacts to the way you move through your day.', note: 'Your little friend is counting on you.' },
+    { tag: '02 / THE DAILY QUEST', title: 'Movement makes it thrive', body: 'Walks help Pebblebit become a Sprinter. Long stretches of sitting shape a calm Frost. Shake events create a glitchy Glitch. When Pebblebit nudges you, a short break helps.', note: 'Small breaks count. No perfect routine required.' },
     { tag: '03 / YOUR PRIVACY', title: 'Your privacy matters', body: 'Phone motion is processed on your device. In Desk mode, posture video is processed locally and never uploaded. If you ask Professor Liveoak for help, your pet stats are shared with the AI service to personalize its reply.', note: 'You stay in control of the features you use.' },
   ];
-  const panel = document.createElement('section'); panel.className = 'onboard'; panel.setAttribute('aria-label', 'Pengbit introduction'); panel.setAttribute('aria-live', 'polite');
+  const panel = document.createElement('section'); panel.className = 'onboard'; panel.setAttribute('aria-label', 'Pebblebit introduction'); panel.setAttribute('aria-live', 'polite');
   const count = document.createElement('p'); count.className = 'onboard-count';
   const tag = document.createElement('p'); tag.className = 'onboard-tag';
   const title = document.createElement('h2'); title.className = 'onboard-title';

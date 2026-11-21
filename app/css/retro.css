@@ -110,7 +110,7 @@ body::after {
 #tab-insights::before { content: "\25C6  INSIGHTS.EXE"; } #tab-talk::before { content: "\260E  FIELD_RADIO.EXE"; }
 #tab-desk::before { content: "\25A3  DESK.EXE - posture cam"; } #tab-campus::before { content: "\2302  CAMPUS.EXE"; }
 .fks-join::before { content: "JOIN.EXE"; } .fks-ring::before { content: "FLOCK.EXE - live"; } .fks-side::before { content: "STATS.EXE"; }
-.demo::before { content: "PENGBIT.EXE"; } .onboard::before { content: "Welcome to Pengbit"; }
+.demo::before { content: "PEBBLEBIT.EXE"; } .onboard::before { content: "Welcome to Pebblebit"; }
 .nm-box::before { content: "New Hardware Found"; } .ex-sheet::before { content: "MOVE.EXE"; }
 .ex-sheet { padding-top: 36px; border-radius: 0; }
 .nm-box, .onboard { padding-top: 36px; }

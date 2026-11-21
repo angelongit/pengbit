@@ -1,7 +1,7 @@
-// The Neglect Mirror (Daniel, W6). When Pengbit's joy hits zero, it pops up in a Y2K error window
+// The Neglect Mirror (Daniel, W6). When Pebblebit's joy hits zero, it pops up in a Y2K error window
 // and blames you for its neglect. Then the webcam opens and slowly morphs YOU into the same state:
 // greyer, puffier, a scruffy beard, eye bags, a bathrobe, a rain cloud and a sad cigarette.
-// "Keep ignoring" closes the window and turns the camera off; "Play with Pengbit" plays and closes.
+// "Keep ignoring" closes the window and turns the camera off; "Play with Pebblebit" plays and closes.
 //
 // Uses the shared pose module (one camera, one MediaPipe model for the whole app). Video never
 // leaves the device. Re-arms once joy is back above 20. Setup has a test button for demos.
@@ -44,7 +44,7 @@ function addTestButton() {
   b.textContent = 'Test: joy hits zero (Neglect Mirror)';
   b.style.marginTop = '8px';
   b.onclick = () => {
-    if (ctx.pet.isEgg) return ctx.toast?.('Hatch Pengbit first.');
+    if (ctx.pet.isEgg) return ctx.toast?.('Hatch Pebblebit first.');
     ctx.pet.happy = 0; ctx.render?.();
     armed = false; open();
   };
@@ -59,7 +59,7 @@ function open() {
   wrap.id = 'mirrorWin';
   wrap.innerHTML = `
     <div class="mw">
-      <div class="mw-bar"><span>PENGBIT.EXE - Neglect Error</span><b class="mw-x" title="Keep ignoring">x</b></div>
+      <div class="mw-bar"><span>PEBBLEBIT.EXE - Neglect Error</span><b class="mw-x" title="Keep ignoring">x</b></div>
       <div class="mw-body">
         <div class="mw-top">
           <canvas class="mw-pet" width="64" height="64"></canvas>
@@ -71,7 +71,7 @@ function open() {
         </div>
         <p class="mw-note"></p>
         <div class="mw-btns">
-          <button type="button" class="mw-play">Play with Pengbit</button>
+          <button type="button" class="mw-play">Play with Pebblebit</button>
           <button type="button" class="mw-ignore">Keep ignoring</button>
         </div>
         <p class="mw-fine">Camera stays on this device.</p>
@@ -134,7 +134,7 @@ async function startCamera() {
     const b = document.createElement('button');
     b.type = 'button'; b.textContent = 'Look in the mirror';
     b.onclick = () => startCamera();
-    ui.note.append(e?.stage === 'camera' ? "Pengbit can't see you. " : 'The mirror is foggy. ', b);
+    ui.note.append(e?.stage === 'camera' ? "Pebblebit can't see you. " : 'The mirror is foggy. ', b);
   }
 }
 

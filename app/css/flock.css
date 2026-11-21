@@ -1,4 +1,4 @@
-/* W1 Pengbit Flock: the Flock tab. */
+/* W1 Pebblebit Flock: the Flock tab. */
 #tab-flock .fk-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 #tab-flock h2 { font-family: var(--pix); font-size: 13px; margin: 0; color: var(--band); }
 #tab-flock .fk-privacy { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: stretch; margin: 10px 0 4px; }

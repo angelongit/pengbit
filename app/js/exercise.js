@@ -1,5 +1,5 @@
 // W2: Camera-verified exercise challenges.
-// After a sitting nudge (pet:idle), or from the Move tab, Pengbit asks for a short challenge:
+// After a sitting nudge (pet:idle), or from the Move tab, Pebblebit asks for a short challenge:
 // squats, arm raises or an overhead stretch. The camera feed goes to MediaPipe Pose Landmarker
 // running in the browser (pose.js); it draws the skeleton, counts reps and gives form hints.
 // Video never leaves the phone. If the camera or the model fails, the phone's motion sensor
@@ -138,7 +138,7 @@ function build() {
         <canvas class="ex-pet" width="32" height="32"></canvas>
         <p class="ex-summary"></p>
         <div class="ex-rewards"></div>
-        <button class="btn-chrome big ex-back">Back to Pengbit</button>
+        <button class="btn-chrome big ex-back">Back to Pebblebit</button>
       </section>
     </div>`;
   document.body.appendChild(root);
@@ -261,7 +261,7 @@ async function startCamera() {
   });
 }
 
-// Pengbit cheers in the corner and hops on every rep.
+// Pebblebit cheers in the corner and hops on every rep.
 function drawPet(g, w, h, now) {
   const img = sprite(ctx.pet.form, Math.floor(now / 300) % 2);
   if (!img) return;

@@ -1,4 +1,4 @@
-// W1 Pengbit Flock: the live screen (flock.html). Polls /api/flock and draws the flock around
+// W1 Pebblebit Flock: the live screen (flock.html). Polls /api/flock and draws the flock around
 // the shared model, the accuracy by round, and optionally runs simulated penguins in this browser.
 import { loadSprites, sprite } from './sprites.js';
 import { getState, post } from './flock-core.js';

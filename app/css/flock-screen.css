@@ -1,4 +1,4 @@
-/* W1 Pengbit Flock: the big live screen (flock.html), made for a laptop or projector. */
+/* W1 Pebblebit Flock: the big live screen (flock.html), made for a laptop or projector. */
 body.fks { padding: 20px clamp(16px, 3vw, 40px); }
 .fks-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
 .fks-top .logo { font-size: clamp(20px, 3vw, 38px); }

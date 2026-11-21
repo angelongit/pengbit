@@ -1,11 +1,11 @@
-// Pengbit's mood look and lifespan (Daniel, W6).
+// Pebblebit's mood look and lifespan (Daniel, W6).
 //
-// Mood: as joy (happiness) drops, Pengbit visibly declines: duller colors, a rounder body,
+// Mood: as joy (happiness) drops, Pebblebit visibly declines: duller colors, a rounder body,
 // an outgrown scruffy beard, a tatty bathrobe, a rain cloud, and at rock bottom a sad
 // cigarette with smoke. Every stage reverses as joy comes back.
 //
-// Lifespan: if nobody interacts with the app for a week, Pengbit passes away. The screen shows a
-// tombstone with its name and a little ghost Pengbit with a halo, plus a button to hatch a new egg.
+// Lifespan: if nobody interacts with the app for a week, Pebblebit passes away. The screen shows a
+// tombstone with its name and a little ghost Pebblebit with a halo, plus a button to hatch a new egg.
 // When you come back, Professor Liveoak offers condolences (on screen and aloud) and a new egg.
 // Setup has a "Skip a week" test button so the team can demo it without waiting.
 //
@@ -132,7 +132,7 @@ function cigarette(g, bx, by, now) {
   }
 }
 
-// Tombstone with RIP, and a little ghost Pengbit with a halo bobbing above it.
+// Tombstone with RIP, and a little ghost Pebblebit with a halo bobbing above it.
 const RIP = ['###.###.###', '#.#..#..#.#', '##...#..###', '#.#..#..#..', '#.#.###.#..'];
 function grave(g, img, x, y, now) {
   const sx = x + 6, sy = y + 12;
@@ -158,7 +158,7 @@ function grave(g, img, x, y, now) {
   g.fillRect(gx + 6, gy - 3, 8, 1); g.fillRect(gx + 5, gy - 2, 1, 1); g.fillRect(gx + 14, gy - 2, 1, 1); g.fillRect(gx + 6, gy - 1, 8, 1);
 }
 
-let dead = null;   // { name, at, age } while Pengbit has passed away
+let dead = null;   // { name, at, age } while Pebblebit has passed away
 let audioReady = false;   // phones only play voice after the first tap
 
 export function paintPet(g, img, x, y, pet, now) {
@@ -206,12 +206,12 @@ function showMemorial(ctx) {
   box.append(t, b);
 }
 
-// Professor Liveoak's condolences when you come back to a Pengbit that has passed away.
+// Professor Liveoak's condolences when you come back to a Pebblebit that has passed away.
 // Gentle on purpose: no guilt, just kindness and a fresh start.
 const CONDOLENCES = [
   (n, a) => `Oh, my friend. I am so sorry. ${n} has passed on while you were away. ${n} lived ${a}, and every one of those minutes counted. When you are ready, I have a fresh egg warming in the lab. Shall we hatch it together?`,
   (n, a) => `Come in, come in. I have sad news, I am afraid. ${n} slipped away peacefully, after ${a} of waddling through life with you. It happens to the best of keepers. A new egg is waiting whenever you feel up to it.`,
-  (n, a) => `My deepest condolences. ${n} was a remarkable little penguin, ${a} young. I have written a final page in the Pengbit Index for them. And look here, a new egg, wiggling already. Would you like to give it a home?`,
+  (n, a) => `My deepest condolences. ${n} was a remarkable little penguin, ${a} young. I have written a final page in the Pebblebit Index for them. And look here, a new egg, wiggling already. Would you like to give it a home?`,
 ];
 let condoled = false;          // once per visit
 function condole(ctx) {
@@ -243,7 +243,7 @@ function offerEgg(ctx) {
 function die(ctx) {
   if (dead) return;
   const pet = ctx.pet;
-  dead = { name: pet.name || 'Pengbit', at: Date.now(), age: fmtAge(pet.age) };
+  dead = { name: pet.name || 'Pebblebit', at: Date.now(), age: fmtAge(pet.age) };
   ctx.store.set('dead', dead);
   showMemorial(ctx);
   ctx.toast?.(`${dead.name} waited a whole week for you and passed away.`, 6000);
@@ -305,7 +305,7 @@ export function init(ctx) {
   const touch = () => {
     if (!audioReady) {
       audioReady = true;
-      if (dead) setTimeout(() => condole(ctx), 600);   // let Wake Pengbit finish unlocking audio first
+      if (dead) setTimeout(() => condole(ctx), 600);   // let Wake Pebblebit finish unlocking audio first
     }
     if (dead) return;
     const now = Date.now();

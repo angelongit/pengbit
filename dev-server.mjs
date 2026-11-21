@@ -1,4 +1,4 @@
-// Local Pengbit server with no Vercel CLI: serves app/ and runs app/api/*.js like Vercel does.
+// Local Pebblebit server with no Vercel CLI: serves app/ and runs app/api/*.js like Vercel does.
 // Usage (from the repo root):  npm install   then   node dev-server.mjs   then open http://localhost:3000
 // Keys go in .env.local at the repo root (never commit it), one per line, e.g. ELEVENLABS_API_KEY=...
 import http from 'node:http';
@@ -89,7 +89,7 @@ http.createServer((req, res) => {
   if (url.pathname.startsWith('/api/')) return handleApi(req, res, url);
   serveStatic(req, res, url);
 }).listen(PORT, () => {
-  console.log(`\nPengbit running at http://localhost:${PORT}\n`);
+  console.log(`\nPebblebit running at http://localhost:${PORT}\n`);
   console.log(`  app folder: ${APP}${fs.existsSync(path.join(APP, 'index.html')) ? '' : '  (NOT FOUND: run this from the pengbit repo folder)'}`);
   console.log(`  key file: ${envFiles.length ? envFiles.join(', ') : 'NONE FOUND in ' + ROOT}`);
   const has = (k) => (process.env[k] ? 'set' : 'MISSING');

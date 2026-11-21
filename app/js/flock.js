@@ -1,4 +1,4 @@
-// W1 Pengbit Flock: federated learning on the phone (the Flock tab).
+// W1 Pebblebit Flock: federated learning on the phone (the Flock tab).
 // This phone trains the activity model on its own recorded motion and shares only what it learned:
 // model weights, a sample count and per-feature averages. Raw motion windows never leave the phone.
 // The server (api/flock) averages everyone's weights (FedAvg) into a shared model each round.
@@ -29,10 +29,10 @@ function client() {
 function html() {
   return `
   <div class="fk-head">
-    <h2>Pengbit Flock</h2>
+    <h2>Pebblebit Flock</h2>
     <span id="fkNet" class="chip">offline</span>
   </div>
-  <p class="muted">Every Pengbit learns from its own owner's moves, then the flock pools what they learned.
+  <p class="muted">Every Pebblebit learns from its own owner's moves, then the flock pools what they learned.
   Your phone sends <b>what the model learned</b>, never <b>how you moved</b>.</p>
 
   <div class="fk-privacy">
@@ -100,7 +100,7 @@ export async function init(c) {
   el.fkAuto.checked = fs.auto; el.fkUse.checked = fs.use;
   el.fkAuto.onchange = () => { fs.auto = el.fkAuto.checked; save(); };
   el.fkUse.onchange = () => { fs.use = el.fkUse.checked; fs.adopted = -1; save(); if (fs.use) adopt(); };
-  el.fkJoin.onclick = () => { fs.joined = !fs.joined; save(); render(); if (fs.joined) { msg('Joined. Your Pengbit is in the flock.'); sync(); } else msg('Left the flock. Nothing more is shared.'); };
+  el.fkJoin.onclick = () => { fs.joined = !fs.joined; save(); render(); if (fs.joined) { msg('Joined. Your Pebblebit is in the flock.'); sync(); } else msg('Left the flock. Nothing more is shared.'); };
   el.fkShare.onclick = () => share(true);
   el.fkTeach.onclick = startTeach;
 

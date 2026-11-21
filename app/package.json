@@ -2,7 +2,7 @@
   "name": "pengbit-app",
   "private": true,
   "type": "module",
-  "description": "Pengbit phone app: static PWA + Vercel serverless proxy for the AI professor",
+  "description": "Pebblebit phone app: static PWA + Vercel serverless proxy for the AI professor",
   "scripts": {
     "dev": "vercel dev",
     "serve": "npx --yes serve -l 5173 ."

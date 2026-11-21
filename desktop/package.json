@@ -2,7 +2,7 @@
   "name": "pengbit-desktop",
   "version": "1.0.0",
   "private": true,
-  "description": "Pengbit desktop companion: the penguin walks around on top of your other windows.",
+  "description": "Pebblebit desktop companion: the penguin walks around on top of your other windows.",
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",

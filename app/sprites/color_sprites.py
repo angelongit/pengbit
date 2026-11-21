@@ -1,4 +1,4 @@
-# Pengbit color sprites for the phone/desk app: 32x32 RGBA, 2 frames, dark teal screen (#0d2a36).
+# Pebblebit color sprites for the phone/desk app: 32x32 RGBA, 2 frames, dark teal screen (#0d2a36).
 # Original character; soft kawaii style (dark hood, one white face+belly, dot eyes, round beak, rosy cheeks).
 import numpy as np, sys, os
 from PIL import Image
@@ -100,7 +100,7 @@ def egg(f):
     return g
 
 def slouch(f):
-    # Desk-mode reaction: Pengbit hunched forward and squashed, with posture-glitch tears.
+    # Desk-mode reaction: Pebblebit hunched forward and squashed, with posture-glitch tears.
     g, cy = penguin(blink=(f == 'b'), tuft=True, squash=2)
     out = g.copy()
     for y0, y1, s in ([(13, 14, 3), (23, 23, -2)] if f == 'a' else [(15, 16, -3), (21, 22, 2)]):

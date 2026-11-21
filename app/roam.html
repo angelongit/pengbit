@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pengbit Roam</title>
+<title>Pebblebit Roam</title>
 <!-- Desktop overlay page. The desktop companion (desktop/) loads this in a transparent, always-on-top,
-     click-through window that covers the screen. Pengbit's state comes from the main Pengbit page
+     click-through window that covers the screen. Pebblebit's state comes from the main Pebblebit page
      (js/roam.js) over BroadcastChannel 'pengbit-roam'. Opened in a normal tab, it is a test stage. -->
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
@@ -24,7 +24,7 @@
     document.body.classList.add('preview');
     const h = document.createElement('div');
     h.id = 'hint';
-    h.textContent = 'Roam preview. Open Pengbit in another tab of this browser to sync.';
+    h.textContent = 'Roam preview. Open Pebblebit in another tab of this browser to sync.';
     document.body.appendChild(h);
   }
   await loadSprites();
@@ -45,7 +45,7 @@
     chan.postMessage({ type: 'hello' });
   }
   setTimeout(() => {
-    if (!lastState) roamer.say('Open the Pengbit app so I know how I\'m feeling!', { ms: 6000 });
+    if (!lastState) roamer.say('Open the Pebblebit app so I know how I\'m feeling!', { ms: 6000 });
   }, 4000);
 
   if (desk?.onCursor) desk.onCursor((x, y) => roamer.setCursor(x, y));
