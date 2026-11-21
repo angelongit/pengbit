@@ -181,10 +181,12 @@ export function init(ctx) {
       ? (state.status === 'paused' ? 'Study paused' : STUDY_ACTIONS[action])
       : state.phase === 'break' ? 'Taking a break' : 'Pebblebit’s study desk';
     if (petAction.textContent !== caption) petAction.textContent = caption;
-    const timerStatus = state.phase + ':' + state.status + ':' + elClock.textContent;
+    const timerStatus = [state.phase, state.status, elClock.textContent, caption].join(':');
     if (lastTimerStatus !== timerStatus) {
       lastTimerStatus = timerStatus;
-      ctx.bus?.emit('focus:state', { phase: state.phase, status: state.status, clock: elClock.textContent });
+      ctx.bus?.emit('focus:state', {
+        phase: state.phase, status: state.status, clock: elClock.textContent, activity: caption
+      });
     }
   }
 

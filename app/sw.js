@@ -1,6 +1,6 @@
 // Offline cache for the app shell. API calls always go to the network.
 // Bump on every change so phones pick up new code (pengbit-v3, v4, ...).
-const CACHE = 'pengbit-v22-focus-desktop';
+const CACHE = 'pengbit-v23-dock-study';
 const SHELL = ['./', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/main.js', 'js/pet.js', 'js/activity.js', 'js/pose.js', 'js/sprites.js', 'js/sprites-builtin.js', 'js/audio.js', 'js/ai.js',
   'js/evolutions.js', 'js/recap.js', 'js/focus-timer.js', 'css/focus.css', 'sprites/study-actions.png',

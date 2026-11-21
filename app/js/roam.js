@@ -48,19 +48,25 @@ export async function init(c) {
   }
   setInterval(() => send({ type: 'state', state: snapshot() }), 500);
   if (desktop && chan) {
-    const scene = document.getElementById('scene');
-    const graphics = scene?.getContext('2d');
-    // Mirror just the game's pixel canvas, and only while the dock is listening.
-    if (graphics) setInterval(() => {
+    const petScene = document.getElementById('scene');
+    // Mirror only game artwork. Camera previews and the rest of the screen stay separate.
+    setInterval(() => {
       if (performance.now() >= dockWatchingUntil) return;
+      const studyScene = focus?.phase === 'focus' && document.getElementById('ft-pet');
+      const scene = studyScene || petScene;
+      const graphics = scene?.getContext('2d');
+      if (!graphics) return;
       const pixels = graphics.getImageData(0, 0, scene.width, scene.height);
-      chan.postMessage({ type: 'dock:scene', pixels });
+      chan.postMessage({ type: 'dock:scene', pixels, study: !!studyScene });
     }, 100);
   }
 
   const bus = ctx.bus;
   if (bus) {
-    bus.on('focus:state', (timer) => { focus = timer; });
+    bus.on('focus:state', (timer) => {
+      focus = timer;
+      if (desktop) send({ type: 'state', state: snapshot() });
+    });
     bus.on('focus:encourage', (text) => send({ type: 'say', who: 'prof', text }));
     const lines = { 'pet:hungry': 'hungry...', 'pet:sad': ':(', 'pet:idle': 'brrr... walk with me?', 'pet:move': 'warm!' };
     for (const [type, text] of Object.entries(lines)) bus.on(type, () => send({ type: 'say', who: 'pet', text, ms: 3500 }));

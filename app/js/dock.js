@@ -10,6 +10,7 @@ const message = document.getElementById('message');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const postureLabels = { upright: 'Sitting upright', slouch: 'Slouch detected', away: 'Away from desk' };
 let state, lastSeen, lastScene;
+let showingStudy = false;
 let messageUntil = 0;
 let ready = false;
 
@@ -24,7 +25,7 @@ function draw(now) {
   timer.hidden = !hasTimer;
   pause.hidden = !hasTimer || !bridge;
   if (hasTimer) {
-    setText(timer, (focus.phase === 'break' ? 'Break ' : 'Focus ') + focus.clock);
+    setText(timer, focus.clock + ' left');
     setText(pause, focus.status === 'paused' ? 'Resume' : 'Pause');
   }
   if (!fresh) {
@@ -33,7 +34,8 @@ function draw(now) {
   } else {
     setText(name, state.name || 'Pebblebit');
     const posture = state.mode === 'desk' ? postureLabels[state.posture] : '';
-    setText(status, state.dead ? 'Resting' : state.isEgg ? 'Hatching' : posture || 'Ready to study');
+    setText(status, hasTimer ? focus.activity || (focus.phase === 'break' ? 'Taking a break' : 'Studying')
+      : state.dead ? 'Resting' : state.isEgg ? 'Hatching' : posture || 'Ready to study');
     if (Date.now() >= messageUntil) {
       const prompt = state.mode === 'desk' ? 'Step away for a short break.' : 'Take a short movement break.';
       setText(message, state.shivering ? prompt : 'Joy ' + (state.happy ?? '—') + ' · Energy ' + (state.energy ?? '—'));
@@ -61,9 +63,12 @@ if ('BroadcastChannel' in window) {
       state = data.state;
       lastSeen = Date.now();
     } else if (data?.type === 'dock:scene' && data.pixels instanceof ImageData
-      && data.pixels.width === 96 && data.pixels.height === 64) {
-      if (!motion.matches || !lastScene || Date.now() - lastScene >= 1000) {
-        graphics.putImageData(data.pixels, 0, 0);
+      && (data.study ? data.pixels.width === 64 && data.pixels.height === 48
+        : data.pixels.width === 96 && data.pixels.height === 64)) {
+      if (showingStudy !== data.study || !motion.matches || !lastScene || Date.now() - lastScene >= 1000) {
+        showingStudy = data.study;
+        graphics.clearRect(0, 0, 96, 64);
+        graphics.putImageData(data.pixels, data.study ? 16 : 0, data.study ? 8 : 0);
         lastScene = Date.now();
       }
     } else if (data?.type === 'say' && typeof data.text === 'string' && data.text.trim()) {
