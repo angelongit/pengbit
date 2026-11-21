@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       voice_settings: { stability: 0.4, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true },
     }),
   });
-  if (!r.ok) { console.error('elevenlabs', r.status, await r.text()); return res.status(502).json({ error: 'tts failed' }); }
+  if (!r.ok) { const detail = (await r.text()).slice(0, 300); console.error('[voice] elevenlabs', r.status, detail); return res.status(502).json({ error: 'tts failed', upstream: r.status, detail }); }
   res.setHeader('content-type', 'audio/mpeg');
   res.setHeader('cache-control', 'no-store');
   res.setHeader('x-pengbit-voice', VOICE === FALLBACK_VOICE ? 'default' : 'liveoak');
