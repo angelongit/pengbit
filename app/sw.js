@@ -1,7 +1,7 @@
 // Offline cache for the app shell. API calls always go to the network.
-const CACHE = 'pengbit-v1';
+const CACHE = 'pengbit-v3';
 const SHELL = ['./', 'index.html', 'style.css', 'manifest.webmanifest',
-  'js/main.js', 'js/pet.js', 'js/activity.js', 'js/sprites.js', 'js/sprites-builtin.js', 'js/audio.js', 'js/ai.js',
+  'js/main.js', 'js/pet.js', 'js/activity.js', 'js/pose.js', 'js/sprites.js', 'js/sprites-builtin.js', 'js/audio.js', 'js/ai.js',
   'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });

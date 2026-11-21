@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pose debug</title>
+  <meta name="theme-color" content="#1b1442">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    main { max-width: 760px; margin: 0 auto; padding: 16px; }
+    h1 { font-family: var(--pix); font-size: 16px; }
+    .stage { position: relative; border-radius: 16px; overflow: hidden; border: 2px solid var(--plastic-edge); background: var(--lcd); }
+    canvas { display: block; width: 100%; height: auto; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 12px 0; }
+    .stats div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+    .stats b { display: block; font-family: var(--term); font-size: 24px; }
+    #err { color: #ff9a9a; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Pose debug</h1>
+    <p class="muted">Checks the shared pose module (app/js/pose.js): webcam, MediaPipe Pose Landmarker and the skeleton. Runs on this device only. Video never leaves it.</p>
+    <div class="row wrap">
+      <button id="start" class="btn-chrome">Start camera</button>
+      <button id="flip" class="btn-ghost" disabled>Flip camera</button>
+      <button id="stop" class="btn-ghost" disabled>Stop</button>
+    </div>
+    <p id="err" class="fine"></p>
+    <div class="stage"><canvas id="cv" width="640" height="480"></canvas></div>
+    <div class="stats">
+      <div><span class="label">FPS</span><b id="fps">-</b></div>
+      <div><span class="label">Person</span><b id="present">-</b></div>
+      <div><span class="label">Load time</span><b id="load">-</b></div>
+      <div><span class="label">Runtime</span><b id="info">-</b></div>
+      <div><span class="label">Head drop</span><b id="head">-</b></div>
+      <div><span class="label">Shoulder tilt</span><b id="tilt">-</b></div>
+      <div><span class="label">Elbows L / R</span><b id="elbows">-</b></div>
+      <div><span class="label">Knees L / R</span><b id="knees">-</b></div>
+    </div>
+    <p class="fine">Head drop: nose above the shoulder midpoint, in shoulder widths (lower means slouching). Angles in degrees, shown only when the joints are visible.</p>
+  </main>
+  <script type="module">
+    import { acquire, release, subscribe, drawSkeleton, angle, LM } from './js/pose.js';
+    const $ = (id) => document.getElementById(id);
+    const cv = $('cv');
+    let handle = null, unsub = null, frames = 0, lastFps = performance.now();
+    const seen = (p) => p && (p.visibility ?? 1) > 0.5;
+    const ang = (a, b, c) => (seen(a) && seen(b) && seen(c) ? Math.round(angle(a, b, c)) : '-');
+
+    function onFrame(f) {
+      if (cv.width !== f.width || cv.height !== f.height) { cv.width = f.width; cv.height = f.height; }
+      drawSkeleton(cv, f.landmarks, { mirrored: f.mirrored, video: f.video });
+      frames++;
+      if (f.t - lastFps > 1000) { $('fps').textContent = Math.round(frames * 1000 / (f.t - lastFps)); frames = 0; lastFps = f.t; }
+      $('present').textContent = f.present ? 'yes' : 'no';
+      const l = f.landmarks;
+      if (!l) return;
+      const ls = l[LM.LEFT_SHOULDER], rs = l[LM.RIGHT_SHOULDER], n = l[LM.NOSE];
+      if (seen(ls) && seen(rs)) {
+        const sw = Math.hypot(ls.x - rs.x, ls.y - rs.y) || 1;
+        if (seen(n)) $('head').textContent = (((ls.y + rs.y) / 2 - n.y) / sw).toFixed(2);
+        $('tilt').textContent = Math.round(Math.atan2(rs.y - ls.y, Math.abs(rs.x - ls.x)) * 180 / Math.PI) + '°';
+      }
+      $('elbows').textContent = `${ang(ls, l[LM.LEFT_ELBOW], l[LM.LEFT_WRIST])} / ${ang(rs, l[LM.RIGHT_ELBOW], l[LM.RIGHT_WRIST])}`;
+      $('knees').textContent = `${ang(l[LM.LEFT_HIP], l[LM.LEFT_KNEE], l[LM.LEFT_ANKLE])} / ${ang(l[LM.RIGHT_HIP], l[LM.RIGHT_KNEE], l[LM.RIGHT_ANKLE])}`;
+    }
+
+    async function start(facing = 'user') {
+      $('err').textContent = ''; $('start').disabled = true; $('start').textContent = 'Starting...';
+      const t0 = performance.now();
+      try {
+        const h = await acquire({ facing });
+        if (handle) release(handle);
+        handle = h;
+        $('load').textContent = ((performance.now() - t0) / 1000).toFixed(1) + ' s';
+        $('info').textContent = `${h.info.delegate} · ${h.info.lib}/${h.info.model}`;
+        if (!unsub) unsub = subscribe(onFrame);
+        $('flip').disabled = false; $('stop').disabled = false;
+        $('start').textContent = 'Running';
+      } catch (e) {
+        $('err').textContent = `${e.stage || 'error'}: ${e.message}`;
+        $('start').disabled = false; $('start').textContent = 'Start camera';
+      }
+    }
+    $('start').onclick = () => start('user');
+    $('flip').onclick = () => start(handle && handle.facing === 'user' ? 'environment' : 'user');
+    $('stop').onclick = () => {
+      if (unsub) unsub(); unsub = null;
+      release(handle); handle = null;
+      $('start').disabled = false; $('start').textContent = 'Start camera';
+      $('flip').disabled = true; $('stop').disabled = true; $('fps').textContent = '-';
+    };
+  </script>
+</body>
+</html>
