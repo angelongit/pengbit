@@ -4,8 +4,8 @@
 const FALLBACK_VOICE = 'JBFqnCBsd6RMkjVDRZzb';
 let agentVoice = null;   // cached per server instance
 async function voiceId() {
-  if (process.env.ELEVENLABS_VOICE_ID) return process.env.ELEVENLABS_VOICE_ID;
   if (agentVoice) return agentVoice;
+  if (process.env.ELEVENLABS_VOICE_ID) return process.env.ELEVENLABS_VOICE_ID;
   const agent = process.env.ELEVENLABS_AGENT_ID;
   if (agent) {
     try {
@@ -28,8 +28,7 @@ export default async function handler(req, res) {
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
   const text = String(body.text || '').slice(0, 600);
   if (!text) return res.status(400).json({ error: 'no text' });
-  const VOICE = await voiceId();
-  const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE}?output_format=mp3_44100_64`, {
+  const tts = (voice) => fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_64`, {
     method: 'POST',
     headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY, 'content-type': 'application/json', accept: 'audio/mpeg' },
     body: JSON.stringify({
@@ -38,6 +37,16 @@ export default async function handler(req, res) {
       voice_settings: { stability: 0.4, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true },
     }),
   });
+  let VOICE = await voiceId();
+  let r = await tts(VOICE);
+  // Free ElevenLabs plans can't use Voice Library voices over the API (402 paid_plan_required).
+  // Fall back to a built-in premade voice and remember that choice for this server instance.
+  if (r.status === 402 && VOICE !== FALLBACK_VOICE) {
+    console.error('[voice] voice', VOICE, 'needs a paid plan; using the built-in default voice instead');
+    agentVoice = FALLBACK_VOICE;
+    VOICE = FALLBACK_VOICE;
+    r = await tts(VOICE);
+  }
   if (!r.ok) { const detail = (await r.text()).slice(0, 300); console.error('[voice] elevenlabs', r.status, detail); return res.status(502).json({ error: 'tts failed', upstream: r.status, detail }); }
   res.setHeader('content-type', 'audio/mpeg');
   res.setHeader('cache-control', 'no-store');
