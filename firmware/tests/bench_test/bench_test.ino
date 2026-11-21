@@ -9,7 +9,7 @@
 //   4  Buttons      prints A / B / C presses (D1, D2, D3 to GND, INPUT_PULLUP)
 //   5  Buzzer       three chirps through the NPN on D0
 //   6  IMU          x/y/z in g plus magnitude, ~10 Hz. Uses the built-in LSM6DS3
-//                   on a Sense board, or an external MPU-6050 (GY-521) on D4/D5.
+//                   on a Sense board, or an external MPU-6050/6500/9250/9255 on D4/D5.
 //   0  Stop         stop the running test, show the menu again
 //
 // Wiring for each stage is in firmware/tests/bench_test/README.md.
@@ -44,7 +44,8 @@ Adafruit_SSD1306 display(128, 64, &Wire, -1);
 LSM6DS3 imu(I2C_MODE, 0x6A);  // on its own internal bus, not D4/D5
 #endif
 
-// External MPU-6050 (GY-521 module), read with raw I2C: no library.
+// External MPU-6050 / 6500 / 9250 / 9255 module, read with raw I2C: no library.
+// All four share the accel registers used here (0x6B, 0x1C, 0x3B).
 uint8_t mpuAddr = 0;          // 0x68, or 0x69 if its AD0 pin is pulled high
 enum ImuKind { IMU_NONE, IMU_ONBOARD, IMU_MPU6050 };
 ImuKind imuKind = IMU_NONE;
@@ -99,7 +100,7 @@ void runI2CScan() {
       if (addr < 16) Serial.print('0');
       Serial.print(addr, HEX);
       if (addr == 0x3C || addr == 0x3D) Serial.print(F("  <- SSD1306 OLED"));
-      if (addr == 0x68 || addr == 0x69) Serial.print(F("  <- MPU-6050 (GY-521)"));
+      if (addr == 0x68 || addr == 0x69) Serial.print(F("  <- MPU-6050/6500/9250 IMU"));
       Serial.println();
       found++;
     }
@@ -194,7 +195,8 @@ bool mpuBegin(uint8_t addr) {
   if (Wire.requestFrom(addr, (uint8_t)1) != 1) return false;
   uint8_t who = Wire.read();
   Serial.print(F("  MPU WHO_AM_I = 0x")); Serial.println(who, HEX);
-  // 0x68 is a genuine MPU-6050; clones often answer 0x70, 0x72 or 0x98. All fine.
+  // Any answer is fine, we don't check it. Typical values:
+  // 0x68 MPU-6050, 0x70 MPU-6500, 0x71 MPU-9250, 0x73 MPU-9255 (clones vary).
   Wire.beginTransmission(addr);
   Wire.write(0x6B); Wire.write(0x00);     // PWR_MGMT_1 = 0: wake up (it boots asleep)
   Wire.endTransmission();
@@ -233,13 +235,13 @@ void startImu() {
     if (imuKind == IMU_NONE && (mpuBegin(0x68) || mpuBegin(0x69))) imuKind = IMU_MPU6050;
   }
   if (imuKind == IMU_ONBOARD) Serial.println(F("  using onboard LSM6DS3"));
-  if (imuKind == IMU_MPU6050) Serial.println(F("  using external MPU-6050 on D4/D5"));
+  if (imuKind == IMU_MPU6050) Serial.println(F("  using external MPU-6xxx/9xxx on D4/D5"));
   if (imuKind == IMU_NONE) {
 #if HAS_ONBOARD_IMU
     Serial.println(F("  No IMU found: onboard LSM6DS3 didn't answer and no MPU-6050 on D4/D5."));
 #else
     Serial.println(F("  No IMU found. Board is set to the regular XIAO (no onboard IMU),"));
-    Serial.println(F("  and no MPU-6050 answered at 0x68/0x69. Wire a GY-521 to D4/D5 and run 2."));
+    Serial.println(F("  and no MPU answered at 0x68/0x69. Wire it to D4/D5 and run 2."));
 #endif
     stage = 0;
     printMenu();

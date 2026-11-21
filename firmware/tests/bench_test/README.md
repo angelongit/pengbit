@@ -11,7 +11,7 @@ On every reset it prints which board you selected and **runs an I2C scan first**
 | 3 | OLED text + animation | OLED |
 | 4 | Buttons A/B/C | 3 buttons |
 | 5 | Buzzer chirps | NPN + resistors + buzzer |
-| 6 | IMU (x, y, z, magnitude) | none on a Sense; a GY-521 / MPU-6050 on D4/D5 on a regular XIAO |
+| 6 | IMU (x, y, z, magnitude) | none on a Sense; an MPU-9250/6500 (or MPU-6050) on D4/D5 on a regular XIAO |
 | 0 | Stop, show menu | |
 
 ## First: Sense or regular XIAO?
@@ -102,19 +102,21 @@ DMM check if stuck: with the buzzer "on", voltage from collector to emitter shou
 
 **Sense board:** no wiring, it uses the onboard LSM6DS3.
 
-**Regular XIAO:** use the **GY-521 (MPU-6050)** module from the ELEGOO kit. It shares the I2C bus with the OLED, so its wires go to the same rails/pins:
+**Regular XIAO:** use an external MPU module. Angel's is an **MPU-9250 / 6500 / 9255** board (a GY-521 / MPU-6050 works the same way). It shares the I2C bus with the OLED, so its wires go to the same pins:
 
-| GY-521 pin | Goes to |
+| Module pin | Goes to |
 |---|---|
 | VCC | + rail (3V3) |
 | GND | - rail |
 | SCL | D5 (same as OLED SCL) |
 | SDA | D4 (same as OLED SDA) |
-| XDA, XCL, AD0, INT | leave unconnected |
+| AD0 | leave unconnected (the board pulls it low, giving address **0x68**; tied to 3V3 it becomes 0x69, also fine) |
+| NCS | leave unconnected; it selects I2C when high. **If the scan doesn't show 0x68/0x69, jumper NCS to 3V3** |
+| EDA, ECL, INT, FSYNC | leave unconnected |
 
-Two devices on one I2C bus is normal: each has its own address. Press reset and the startup scan should now list **0x3C (OLED)** and **0x68 (MPU-6050)**. The sketch talks to the MPU-6050 with raw `Wire` calls (wake it via register 0x6B, read 6 bytes from 0x3B, divide by 16384 for g), which is a nice preview of writing your own driver.
+Two devices on one I2C bus is normal: each has its own address. Press reset and the startup scan should list **0x3C (OLED)** and **0x68 (IMU)**. The sketch prints the chip's WHO_AM_I so you can see which one you have (0x71 = 9250, 0x70 = 6500, 0x73 = 9255, 0x68 = 6050; clones vary) and works with any of them, because their accelerometer registers are the same. It talks to the chip with raw `Wire` calls (wake it via register 0x6B, read 6 bytes from 0x3B, divide by 16384 for g), which is a nice preview of writing your own driver.
 
-Then: type `6`, lay it flat: `z` close to `1.00`, `mag` close to `1.00`. Shake it and `mag` jumps to 2 or more. That jump is what the pet's shake detection will use. For the final build the GY-521 goes inside the shell too (it's about 21 x 16 mm), so check it fits next to the battery.
+Then: type `6`, lay it flat: `z` close to `1.00`, `mag` close to `1.00`. Shake it and `mag` jumps to 2 or more. That jump is what the pet's shake detection will use. For the final build the IMU module goes inside the shell too (an MPU-9250 board is about 26 x 16 mm), so check it fits next to the battery.
 
 Close Serial Monitor and open **Tools > Serial Plotter** to see it as a graph (type `6` there too).
 
