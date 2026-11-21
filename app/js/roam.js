@@ -20,6 +20,7 @@ function snapshot() {
     t: Date.now(), name: p.name || 'Pengbit', form: p.form, isEgg: !!p.isEgg, happy: p.happy, energy: p.energy,
     hungry: !!p.hungry, sad: !!p.sad, shivering: !!p.shivering, stillMin: Math.floor((p.stillStreak || 0) / 60),
     mode: p.mode, act: a.act, posture, dead,
+    graves: (ctx.names?.graveyard?.() || []).map((g) => g.name).filter(Boolean).slice(-6),
   };
 }
 
@@ -51,6 +52,7 @@ export async function init(c) {
     bus.on('desk:posture', (p) => { posture = p?.label || null; });
     bus.on('mode:changed', () => { posture = null; });
     bus.on('pet:died', () => { dead = true; });
+    bus.on('pet:named', (p) => p?.name && send({ type: 'say', who: 'pet', text: `I'm ${p.name}!`, ms: 4000 }));
     bus.on('pet:hatched', () => { dead = false; });
   }
   // A new egg after a death: the pet is an egg again and alive.

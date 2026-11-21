@@ -304,6 +304,31 @@ export function createRoamer(root, opts = {}) {
   el.addEventListener('pointerup', release);
   el.addEventListener('pointercancel', release);
 
+  // ---- tombstones of past Pengbits, standing along the floor behind the new one
+  const graveEls = [];
+  function drawGraves() {
+    graveEls.splice(0).forEach((g) => g.remove());
+    (snap.graves || []).forEach((name, i, all) => {
+      const d = document.createElement('div');
+      d.className = 'roam-grave';
+      d.title = `Here lies ${name}`;
+      const fx = (i + 1) / (all.length + 1);
+      Object.assign(d.style, {
+        position: 'absolute', left: `calc(${(fx * 100).toFixed(1)}% - 34px)`, bottom: '0', width: '68px', height: '78px',
+        background: 'linear-gradient(#a9b3bf, #7d8794)', border: '3px solid #4c5562', borderBottom: '0',
+        borderRadius: '34px 34px 0 0', color: '#2b313a', textAlign: 'center', zIndex: 1, pointerEvents: 'none',
+        font: 'bold 11px/1.2 "Lucida Console", monospace', paddingTop: '14px', boxSizing: 'border-box', opacity: 0.92,
+        overflow: 'hidden', wordBreak: 'break-word',
+      });
+      d.innerHTML = '<div style="font-size:13px">RIP</div>';
+      const n = document.createElement('div');
+      n.textContent = name.length > 10 ? name.slice(0, 9) + '.' : name;
+      d.appendChild(n);
+      root.insertBefore(d, el);
+      graveEls.push(d);
+    });
+  }
+
   // ---- slouch / sprite extras
   const extra = {};
   Promise.all(['slouch_a', 'slouch_b'].map((k) => new Promise((res) => {
@@ -312,19 +337,21 @@ export function createRoamer(root, opts = {}) {
 
   return {
     setState(s) {
+      const first = !synced;
       const was = synced ? snap : { ...snap, ...s };       // no greeting/evolve lines for the first sync
       synced = true;
       snap = { ...snap, ...s };
       if (s.posture === 'slouch' || (s.mode === 'desk' && s.act === 'shake')) slouchSince ||= performance.now(); else slouchSince = 0;
       if (was.dead && !snap.dead) { mode = 'fall'; }
       if (!was.dead && snap.dead) { mode = 'ghost'; say(`${snap.name || 'Pengbit'}... :(`); }
-      if (was.isEgg && !snap.isEgg) { hop(1.2); say(`hi! I'm ${snap.name || 'Pengbit'}!`); }
+      if (was.isEgg && !snap.isEgg) { hop(1.2); say('hi!! I hatched!'); }
+      if (first || String(was.graves) !== String(snap.graves)) drawGraves();
       if (was.form && snap.form && was.form !== snap.form && !was.isEgg && !snap.isEgg && snap.form !== 'baby') { hop(1.5); say('I evolved!!!'); }
     },
     say,
     setCursor(cx, cy) { cursor = { x: cx, y: cy, at: performance.now() }; },
     poke() { hop(1.2); },
-    destroy() { alive = false; cancelAnimationFrame(raf); el.remove(); bub.remove(); if (hover) opts.onHover?.(false); },
+    destroy() { alive = false; cancelAnimationFrame(raf); el.remove(); bub.remove(); graveEls.forEach((g) => g.remove()); if (hover) opts.onHover?.(false); },
   };
 }
 
