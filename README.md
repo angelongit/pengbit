@@ -91,6 +91,6 @@ Server environment variables (never commit values):
 | ELEVENLABS_VOICE_ID | Optional TTS voice selection |
 | ELEVENLABS_AGENT_ID | Private Conversational AI agent used by Talk |
 
-For W4 live voice chat, create an ElevenLabs Conversational AI agent using Professor Floe's persona and define these dynamic variables: name, formName, happiness, energy, walkMinutes, stillMinutes, shakeMinutes, stillStreakMinutes, nudges, nudgesAnswered, and mode. Set its ID as ELEVENLABS_AGENT_ID in Vercel. The server requests a signed URL; the browser never receives the API key.
+For W4 live voice chat, create an ElevenLabs Conversational AI agent using the setup and persona in docs/professor-floe-agent.md. Define these dynamic variables: name, formName, happiness, energy, walkMinutes, stillMinutes, shakeMinutes, stillStreakMinutes, nudges, nudgesAnswered, and mode. Set its ID as ELEVENLABS_AGENT_ID in Vercel. The server requests a signed URL; the browser never receives the API key.
 
 For local static testing from app/, run npx serve . Motion and camera permissions require a secure context (HTTPS or localhost). Use a real phone over cellular for final testing; event Wi-Fi may interfere with the deployed Vercel HTTPS URL.
