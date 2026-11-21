@@ -1,32 +1,58 @@
-// Chirps (WebAudio, like the buzzer on the hardware) and the professor's voice.
+// Pet sound effects use local Web Audio. The professor uses a separate voice path.
 let ctx = null;
+let petSounds = true;
+let effects = null;
+
 export function unlockAudio() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (ctx.state === 'suspended') ctx.resume();
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return Promise.resolve();
+  if (!ctx) {
+    ctx = new AudioContext();
+    effects = ctx.createGain();
+    effects.gain.value = petSounds ? 1 : 0;
+    effects.connect(ctx.destination);
+  }
+  return ctx.state === 'running' ? Promise.resolve() : ctx.resume().catch(() => {});
 }
 
+export function setPetSounds(enabled) {
+  petSounds = enabled;
+  if (effects) effects.gain.value = enabled ? 1 : 0;
+}
+
+// Each note is [start Hz, end Hz, seconds]. Zero is a rest.
 const CHIRPS = {
-  hello:  [[880, 0.08], [1320, 0.1]],
-  happy:  [[988, 0.07], [1319, 0.07], [1568, 0.12]],
-  feed:   [[660, 0.06], [880, 0.08]],
-  sad:    [[440, 0.15], [330, 0.25]],
-  nudge:  [[1200, 0.06], [0, 0.05], [1200, 0.06], [0, 0.05], [1200, 0.06]],
-  hatch:  [[523, 0.1], [659, 0.1], [784, 0.1], [1047, 0.2]],
-  evolve: [[523, 0.08], [659, 0.08], [784, 0.08], [1047, 0.08], [1319, 0.08], [1568, 0.3]],
-  tick:   [[1500, 0.02]],
+  hello:  [[580, 890, .10], [0, 0, .04], [720, 1040, .11]],
+  feed:   [[440, 250, .09], [0, 0, .04], [510, 310, .10]],
+  happy:  [[790, 1130, .13], [0, 0, .04], [1050, 1450, .14]],
+  hungry: [[380, 560, .18], [0, 0, .08], [380, 500, .15]],
+  sad:    [[620, 360, .25], [420, 280, .22]],
+  nudge:  [[850, 580, .17], [0, 0, .12], [850, 580, .17], [0, 0, .12], [760, 440, .22]],
+  move:   [[500, 740, .12], [740, 960, .12], [960, 1240, .18]],
+  hatch:  [[360, 540, .08], [0, 0, .05], [540, 760, .09], [760, 1150, .17]],
+  evolve: [[523, 660, .10], [660, 784, .10], [784, 1050, .10], [1050, 1560, .24]],
+  tick:   [[1500, 1250, .035]],
 };
 
 export function chirp(name) {
-  if (!ctx) return;
+  if (!petSounds || ctx?.state !== 'running') return;
   let t = ctx.currentTime;
-  for (const [f, d] of CHIRPS[name] || CHIRPS.hello) {
-    if (f) {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'square'; o.frequency.value = f;
-      g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.001, t + d);
-      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + d);
+  for (const [start, end, seconds] of CHIRPS[name] || CHIRPS.hello) {
+    if (start) {
+      const note = ctx.createOscillator();
+      const volume = ctx.createGain();
+      note.type = 'triangle';
+      note.frequency.setValueAtTime(start, t);
+      note.frequency.exponentialRampToValueAtTime(end, t + seconds);
+      volume.gain.setValueAtTime(0.001, t);
+      volume.gain.linearRampToValueAtTime(name === 'nudge' ? 0.15 : 0.10, t + 0.01);
+      volume.gain.exponentialRampToValueAtTime(0.001, t + seconds);
+      note.connect(volume).connect(effects);
+      note.onended = () => { note.disconnect(); volume.disconnect(); };
+      note.start(t);
+      note.stop(t + seconds);
     }
-    t += d;
+    t += seconds;
   }
 }
 

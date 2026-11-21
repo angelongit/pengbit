@@ -2,7 +2,7 @@
 import { Pet, CFG, FORMS, MODE_LABELS } from './pet.js';
 import { ActivityDetector, MLP, ACTS, FEATURE_NAMES, requestMotionPermission } from './activity.js';
 import { loadSprites, sprite } from './sprites.js';
-import { unlockAudio, chirp, vibrate, speak, stopSpeaking } from './audio.js';
+import { unlockAudio, setPetSounds, chirp, vibrate, speak, stopSpeaking } from './audio.js';
 import { dexEntry, coach } from './ai.js';
 import { on, off, emit } from './bus.js';
 import { ctx } from './ctx.js';
@@ -16,7 +16,7 @@ const store = {
   set(k, v) { try { localStorage.setItem('pengbit.' + k, JSON.stringify(v)); } catch {} },
 };
 
-const settings = Object.assign({ demo: false, voice: true, autoCoach: true, wake: true, useModel: true }, store.get('settings', {}));
+const settings = Object.assign({ demo: false, voice: true, petSounds: true, autoCoach: true, wake: true, useModel: true }, store.get('settings', {}));
 const saveSettings = () => store.set('settings', settings);
 
 const pet = new Pet(store.get('pet', null));
@@ -123,15 +123,23 @@ function handleEvents() {
       case 'evolved':
         chirp('evolve'); vibrate([100, 50, 100, 50, 200]); flashUntil = performance.now() + 3000;
         toast(`${pet.name} evolved into ${FORMS[e.value].name}!`, 4000); askDex(true); break;
-      case 'hungry': chirp('sad'); bubble('hungry...'); toast(`${pet.name} is hungry. Press A to feed.`); break;
+      case 'hungry': chirp('hungry'); bubble('hungry...'); toast(`${pet.name} is hungry. Press A to feed.`); break;
       case 'sad': chirp('sad'); bubble(':('); toast(`${pet.name} is sad. Go for a walk or press B to play.`); break;
-      case 'idle':
+      case 'idle': {
+        const desk = pet.mode === 'desk';
+        const position = desk ? 'seated' : 'still';
+        const next = desk ? 'Stand up and step away for a short break.' : 'Time for a short walk!';
         chirp('nudge'); vibrate([200, 100, 200, 100, 200]); bubble('brrr...', 4000);
-        toast(`${pet.name} is shivering after ${e.value} minutes still. Time for a walk!`, 4500);
+        toast(`${pet.name} is shivering after ${e.value} pet minutes ${position}. ${next}`, 4500);
         askCoach('nudge', true); break;
-      case 'move':
-        chirp('happy'); bubble('warm!'); toast(e.value === 'exercise' ? 'Nudge answered with exercise!' : 'Nudge answered. Nice walk!');
+      }
+      case 'move': {
+        const message = e.value === 'exercise' ? 'Nudge answered with exercise!'
+          : pet.mode === 'desk' ? 'Nudge answered. Thanks for taking a desk break!'
+          : 'Nudge answered. Nice walk!';
+        chirp('move'); bubble('warm!'); toast(message);
         askCoach('moved', true); break;
+      }
     }
   }
 }
@@ -184,6 +192,14 @@ function renderStatus() {
   // health
   const t = pet.totals, sum = t.walk + t.still + t.shake || 1;
   $('hStreak').textContent = fmtMin(pet.stillStreak);
+  const nudgeSeconds = Math.max(0, Math.ceil((pet.nextNudgeAt - pet.stillStreak) / (settings.demo ? CFG.DEMO_SPEEDUP : 1)));
+  let nudgeEta = nudgeSeconds < 120 ? `${nudgeSeconds} s` : `${Math.ceil(nudgeSeconds / 60)} min`;
+  if (settings.demo) nudgeEta += ' (demo)';
+  if (pet.isEgg) nudgeEta = 'After hatching';
+  else if (pet.nudged) nudgeEta = pet.mode === 'desk' ? 'Step away for a break' : 'Take a movement break';
+  else if (a.act === 'walk') nudgeEta = 'Starts when you sit';
+  else if (pet.mode !== 'desk' && a.act === 'shake') nudgeEta = 'Paused while shaking';
+  $('hNudgeEta').textContent = nudgeEta;
   $('hNudges').textContent = `${pet.nudgesAnswered} / ${pet.nudges}`;
   $('hRate').textContent = pet.nudges ? Math.round(pet.nudgesAnswered / pet.nudges * 100) + '%' : 'n/a';
   $('hWalk').textContent = fmtMin(t.walk); $('hStill').textContent = fmtMin(t.still); $('hShake').textContent = fmtMin(t.shake);
@@ -479,6 +495,17 @@ function wire() {
   $('nameInput').onchange = (e) => { pet.name = e.target.value.trim().slice(0, 12) || 'Pebblebit'; store.set('pet', pet); renderStatus(); };
   $('demoToggle').checked = settings.demo; $('demoToggle').onchange = (e) => setDemo(e.target.checked);
   $('voiceToggle').checked = settings.voice; $('voiceToggle').onchange = (e) => { settings.voice = e.target.checked; saveSettings(); if (!settings.voice) stopSpeaking(); };
+  $('petSoundsToggle').checked = settings.petSounds;
+  setPetSounds(settings.petSounds);
+  $('petSoundsToggle').onchange = async (e) => {
+    settings.petSounds = e.target.checked;
+    setPetSounds(settings.petSounds);
+    saveSettings();
+    if (settings.petSounds) {
+      await unlockAudio();
+      chirp('hello');
+    }
+  };
   $('coachToggle').checked = settings.autoCoach; $('coachToggle').onchange = (e) => { settings.autoCoach = e.target.checked; saveSettings(); };
   $('wakeToggle').checked = settings.wake; $('wakeToggle').onchange = (e) => { settings.wake = e.target.checked; saveSettings(); if (settings.wake) keepAwake(); else if (wakeLock) wakeLock.release(); };
   document.querySelectorAll('#simSeg button').forEach((b) => b.onclick = () => {
@@ -517,11 +544,11 @@ async function boot() {
   requestAnimationFrame(draw);
 
   $('startBtn').onclick = async () => {
-    unlockAudio();
+    const audioReady = unlockAudio();
     const ok = await requestMotionPermission();
     detector.start();
     $('start').classList.add('hidden');
-    chirp('hello');
+    void audioReady.then(() => chirp('hello'));
     keepAwake();
     if (!ok) toast('Motion access denied. Use Setup > Simulate, or allow motion in Settings.', 5000);
     setTimeout(() => { if (!detector.hasSensor && !detector.sim) toast('No motion sensor found. On a laptop, use Setup > Simulate or keys W / S / K.', 5000); }, 2500);

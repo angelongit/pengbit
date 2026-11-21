@@ -124,15 +124,17 @@
 
     <!-- Health -->
     <section id="tab-health" class="panel hidden">
-      <p class="muted">Students sit for hours. Pebblebit shivers after 45 minutes still and warms up when you walk.</p>
+      <p class="muted">Pebblebit shivers after 45 pet minutes of stillness or sitting.</p>
       <div class="cards">
         <div class="card"><span class="label">Sitting streak</span><strong id="hStreak">0 min</strong></div>
+        <div class="card"><span class="label">Next break reminder</span><strong id="hNudgeEta">After hatching</strong></div>
         <div class="card"><span class="label">Nudges answered</span><strong id="hNudges">0 / 0</strong></div>
         <div class="card"><span class="label">Walking</span><strong id="hWalk">0 min</strong></div>
         <div class="card"><span class="label">Still</span><strong id="hStill">0 min</strong></div>
         <div class="card"><span class="label">Shaking</span><strong id="hShake">0 min</strong></div>
         <div class="card"><span class="label">Answer rate</span><strong id="hRate">n/a</strong></div>
       </div>
+        <p class="fine">An answered nudge means the app detected a walk, a step away from the desk, or a completed exercise.</p>
       <div class="mix" aria-label="Activity mix">
         <i id="mixWalk" class="walk"></i><i id="mixStill" class="still"></i><i id="mixShake" class="shake"></i>
       </div>
@@ -186,6 +188,7 @@
       <label class="field">Name <input id="nameInput" maxlength="12" autocomplete="off"></label>
       <label class="toggle"><input type="checkbox" id="demoToggle"> Demo mode (x60 time)</label>
       <label class="toggle"><input type="checkbox" id="voiceToggle" checked> Professor speaks</label>
+        <label class="toggle"><input type="checkbox" id="petSoundsToggle" checked> Pet sound effects</label>
       <label class="toggle"><input type="checkbox" id="coachToggle" checked> Coach me when I sit too long</label>
       <label class="toggle"><input type="checkbox" id="wakeToggle" checked> Keep screen on</label>
       <div class="field">Simulate activity (no sensor)
