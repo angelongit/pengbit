@@ -1,13 +1,15 @@
 # Firmware
 
-Board: **Seeed Studio XIAO nRF52840 Sense**.
+Board: **Seeed Studio XIAO nRF52840** (regular, not Sense). IMU: external MPU-6500/9250 on D4/D5 at 0x68.
+
+The pet firmware is in [pet/](pet/README.md).
 
 ## Arduino IDE setup
 
 1. File > Preferences > Additional boards manager URLs, add
    `https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json`
 2. Boards Manager: install **Seeed nRF52 Boards** (the non-mbed one; it includes the Bluefruit BLE library).
-3. Select board **Seeed XIAO nRF52840 Sense**.
+3. Select board **Seeed XIAO nRF52840**.
 4. Library Manager: install
    - Adafruit SSD1306
    - Adafruit GFX Library
@@ -23,7 +25,7 @@ If upload fails, double-tap the reset button to enter the bootloader and try aga
 | `tests/io_test` | Buttons A/B/C and the buzzer |
 | `tests/imu_test` | IMU readings and motion magnitude on serial |
 | `tests/ble_test` | Bluetooth UART: board shows up in Web Bluetooth and echoes lines |
-| `pet/` | The pet itself. Written at the event. |
+| `pet/` | The pet itself. See [pet/README.md](pet/README.md). |
 
 ## Hardware for testing
 

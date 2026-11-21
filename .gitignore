@@ -29,3 +29,5 @@ secrets.h
 
 # OpenSCAD backups
 *.scad.bak
+firmware/host_test/test_pet
+firmware/host_test/screens.txt
