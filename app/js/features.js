@@ -10,6 +10,7 @@ const FEATURES = [
   // './campus.js',     // W9 Campus wellness dashboard
   './pip.js',           // W6 Floating window (Daniel)
   './mood.js',          // W6 Mood look: glum, scruffy, rounder as joy drops (Daniel)
+  './roam.js',          // Desktop roaming Pengbit (desktop/ companion + in-page fallback)
 ];
 
 export async function initFeatures(ctx) {
