@@ -92,13 +92,14 @@ http.createServer((req, res) => {
   const has = (k) => (process.env[k] ? 'set' : 'MISSING');
   console.log(`  ELEVENLABS_API_KEY  ${has('ELEVENLABS_API_KEY')}`);
   console.log(`  ELEVENLABS_AGENT_ID ${has('ELEVENLABS_AGENT_ID')}`);
-  console.log(`  ANTHROPIC_API_KEY   ${has('ANTHROPIC_API_KEY')}\n`);
+  console.log(`  ANTHROPIC_API_KEY   ${has('ANTHROPIC_API_KEY')}`);
+  console.log(`  GEMINI_API_KEY      ${has('GEMINI_API_KEY')}  (dex/coach need one of these two)\n`);
   selfTest();
 });
 
 // Tells you right away if this network blocks the AI services (e.g. school Wi-Fi intercepting TLS).
 async function selfTest() {
-  for (const [label, url] of [['ElevenLabs', 'https://api.elevenlabs.io/v1/models'], ['Anthropic', 'https://api.anthropic.com/v1/models']]) {
+  for (const [label, url] of [['ElevenLabs', 'https://api.elevenlabs.io/v1/models'], ['Anthropic', 'https://api.anthropic.com/v1/models'], ['Gemini', 'https://generativelanguage.googleapis.com/v1beta/models']]) {
     try {
       await fetch(url, { signal: AbortSignal.timeout(8000) });
       console.log(`  network: ${label} reachable`);
