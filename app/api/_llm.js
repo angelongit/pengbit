@@ -37,6 +37,7 @@ export function cleanPet(p = {}) {
     ageMinutes: num(p.ageMinutes), happiness: num(p.happiness), energy: num(p.energy),
     minutes: { walk: num(m.walk), still: num(m.still), shake: num(m.shake) },
     stillStreakMinutes: num(p.stillStreakMinutes), nudges: num(p.nudges), nudgesAnswered: num(p.nudgesAnswered),
+    mode: p.mode === 'desk' ? 'desk' : 'phone',
   };
 }
 

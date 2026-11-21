@@ -38,3 +38,19 @@ tap **Wake Pengbit**, and the phone's motion sensor feeds the pet. Add it to the
 - Sprites: drop PNGs in `sprites/` (see `sprites/README.md`).
 - Prompts and the professor's personality: `api/_prompts.js`.
 - Voice: `api/voice.js`.
+
+## Adding a feature (the seam)
+
+New features plug in without editing `main.js`:
+
+1. Write `js/<feature>.js` exporting `init(ctx)`. Uncomment your line in `js/features.js`.
+2. Fill your empty `<section id="tab-<name>">` from JS and call `ctx.showTab('<name>')`. Styles go in `css/<name>.css`.
+3. Listen and talk on the bus (`ctx.bus.on/emit`, or import `js/bus.js`):
+   `pet:hatched`, `pet:evolved`, `pet:hungry`, `pet:sad`, `pet:idle` (still minutes), `pet:move` ('walk' | 'exercise'),
+   `pet:minute` {act, at}, `activity:window` {f, result} (every second), `model:changed` {source, valAcc}.
+4. `ctx` (see `js/ctx.js`): `pet` (with `reward({happy, energy, reason, reps})`, `answerNudge(via)`), `detector`, `store`,
+   `settings`, `getModel()`, `setModel(mlp, source)`, `getDataset()`, `addData(rows)`, `toast`, `bubble`, `say`, `chirp`,
+   `vibrate`, `showTab`, `openTab`, `render`, `deviceId`, `setActivitySource(src)` (src.last = {act, conf, source, label};
+   null goes back to the phone's motion), `getActivity()`.
+   Desk mode: `pet.mode` is 'phone' or 'desk'; `MODE_LABELS` in pet.js gives display names; `new MLP(null, { nIn })`.
+5. Add new files to `SHELL` in `sw.js` and bump `CACHE`.

@@ -30,6 +30,12 @@ export const FORMS = {
   glitch:   { name: 'Glitch Pengbit',   blurb: 'Raised on shakes. Crackles with static.' },
 };
 
+// Activity names per mode. Desk mode reuses the same three slots for posture.
+export const MODE_LABELS = {
+  phone: { walk: 'walk', still: 'still', shake: 'shake' },
+  desk: { walk: 'away', still: 'upright', shake: 'slouch' },
+};
+
 const clamp = (v) => Math.max(0, Math.min(100, Math.round(v)));
 
 export class Pet {
@@ -41,6 +47,7 @@ export class Pet {
 
   reset() {
     this.name = this.name || 'Pengbit';
+    this.mode = this.mode || 'phone';     // 'phone' (motion) or 'desk' (posture); kept across new eggs
     this.happy = CFG.STAT_START;
     this.energy = CFG.STAT_START;
     this.form = 'egg';
@@ -55,6 +62,8 @@ export class Pet {
     // Impact metric: how many sitting nudges were followed by a walk.
     this.nudges = 0;
     this.nudgesAnswered = 0;
+    this.answeredBy = { walk: 0, exercise: 0 };
+    this.exercise = { sessions: 0, reps: 0 };
     this.evolvedAt = null;
     this.events = [];
   }
@@ -108,7 +117,8 @@ export class Pet {
     this.checkLowStats();
 
     // Sitting nudge. STILL builds the streak, WALK clears it, SHAKE leaves it alone.
-    if (act === 'still') {
+    // In desk mode a slouch is still sitting, so it builds the streak too.
+    if (act === 'still' || (this.mode === 'desk' && act === 'shake')) {
       this.stillStreak += dt;
       if (this.stillStreak >= this.nextNudgeAt) {
         this.push('idle', Math.floor(this.stillStreak / 60));
@@ -117,8 +127,7 @@ export class Pet {
         this.nextNudgeAt += CFG.NUDGE_REPEAT_S;
       }
     } else if (act === 'walk') {
-      if (this.nudged) { this.nudgesAnswered++; this.push('move'); }
-      this.nudged = false;
+      this.answerNudge('walk');
       this.stillStreak = 0;
       this.nextNudgeAt = CFG.NUDGE_STILL_S;
     }
@@ -144,6 +153,27 @@ export class Pet {
     if (this.isEgg) { this.form = 'baby'; this.age = 0; this.push('hatched'); return true; }
     if (this.form !== 'baby') return false;
     this.evolve();
+    return true;
+  }
+
+  // Counts the open sitting nudge as answered ('walk' or 'exercise'). Returns true if one was open.
+  answerNudge(via = 'walk') {
+    if (!this.nudged) return false;
+    this.nudgesAnswered++;
+    this.answeredBy[via] = (this.answeredBy[via] || 0) + 1;
+    this.nudged = false;
+    this.push('move', via);
+    if (via !== 'walk') { this.stillStreak = 0; this.nextNudgeAt = CFG.NUDGE_STILL_S; }
+    return true;
+  }
+
+  // Stat boost from a feature (e.g. a verified exercise). reason 'exercise' also counts a session.
+  reward({ happy = 0, energy = 0, reason = '', reps = 0 } = {}) {
+    if (this.isEgg) return false;
+    this.happy = clamp(this.happy + happy);
+    this.energy = clamp(this.energy + energy);
+    if (reason === 'exercise') { this.exercise.sessions++; this.exercise.reps += Math.max(0, reps | 0); }
+    this.checkLowStats();
     return true;
   }
 
@@ -176,6 +206,8 @@ export class Pet {
       stillStreakMinutes: min(this.stillStreak),
       nudges: this.nudges,
       nudgesAnswered: this.nudgesAnswered,
+      exercise: { sessions: this.exercise.sessions, reps: this.exercise.reps },
+      mode: this.mode,
     };
   }
 }

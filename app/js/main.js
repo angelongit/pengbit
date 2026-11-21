@@ -1,9 +1,12 @@
 // Pengbit phone app: glue between the pet, the motion detector, the canvas and the professor.
-import { Pet, CFG, FORMS } from './pet.js';
+import { Pet, CFG, FORMS, MODE_LABELS } from './pet.js';
 import { ActivityDetector, MLP, ACTS, FEATURE_NAMES, requestMotionPermission } from './activity.js';
 import { loadSprites, sprite } from './sprites.js';
 import { unlockAudio, chirp, vibrate, speak, stopSpeaking } from './audio.js';
 import { dexEntry, coach } from './ai.js';
+import { on, off, emit } from './bus.js';
+import { ctx } from './ctx.js';
+import { initFeatures } from './features.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -18,6 +21,9 @@ const saveSettings = () => store.set('settings', settings);
 
 const pet = new Pet(store.get('pet', null));
 const detector = new ActivityDetector();
+// Another feature (Desk mode) can drive the pet instead of the phone's motion: src.last = {act, conf, source, label}.
+let activitySource = null;
+const activity = () => (activitySource && activitySource.last) || detector.last;
 let dataset = store.get('dataset', []);       // [{f, label}]
 let model = null;
 let dexHistory = store.get('dex', []);        // [{form, text, at}]
@@ -34,6 +40,12 @@ async function loadModel() {
     } catch {}
   }
   applyModel();
+}
+// Make a model live on this phone (local training or Flock). Everyone else learns via model:changed.
+function setModel(m, source = 'local') {
+  model = m; store.set('model', m.toJSON());
+  settings.useModel = true; saveSettings(); applyModel();
+  emit('model:changed', { source, valAcc: m.stats?.valAcc ?? null });
 }
 function applyModel() {
   detector.model = settings.useModel && model ? model : null;
@@ -103,6 +115,7 @@ function renderHistory() {
 let flashUntil = 0;
 function handleEvents() {
   for (const e of pet.drainEvents()) {
+    emit('pet:' + e.type, e.value);
     switch (e.type) {
       case 'hatched':
         chirp('hatch'); vibrate([60, 40, 60]); flashUntil = performance.now() + 1500;
@@ -117,7 +130,7 @@ function handleEvents() {
         toast(`${pet.name} is shivering after ${e.value} minutes still. Time for a walk!`, 4500);
         askCoach('nudge', true); break;
       case 'move':
-        chirp('happy'); bubble('warm!'); toast('Nudge answered. Nice walk!');
+        chirp('happy'); bubble('warm!'); toast(e.value === 'exercise' ? 'Nudge answered with exercise!' : 'Nudge answered. Nice walk!');
         askCoach('moved', true); break;
     }
   }
@@ -125,13 +138,17 @@ function handleEvents() {
 
 // ---------------------------------------------------------------- game loop (1 Hz)
 let lastTick = performance.now();
+let petMinuteAcc = 0;
 function tick() {
   const now = performance.now();
   const real = Math.min(5, Math.round((now - lastTick) / 1000)) || 1;   // cap catch-up after a stall
   lastTick = now;
   if (document.hidden) return;
-  pet.tick(real * (settings.demo ? CFG.DEMO_SPEEDUP : 1), detector.last.act);
+  const dt = real * (settings.demo ? CFG.DEMO_SPEEDUP : 1);
+  pet.tick(dt, activity().act);
   handleEvents();
+  petMinuteAcc += dt;
+  while (petMinuteAcc >= 60) { petMinuteAcc -= 60; emit('pet:minute', { act: activity().act, at: Date.now() }); }
   store.set('pet', pet);
   renderStatus();
 }
@@ -142,10 +159,10 @@ function renderStatus() {
   for (const [id, v] of [['barHappy', pet.happy], ['barEnergy', pet.energy]]) {
     $(id).style.width = v + '%'; $(id).classList.toggle('low', v < CFG.LOW_STAT);
   }
-  const a = detector.last;
-  $('actName').textContent = a.act; $('actName').className = a.act;
+  const a = activity();
+  $('actName').textContent = (MODE_LABELS[pet.mode] || MODE_LABELS.phone)[a.act] || a.act; $('actName').className = a.act;
   $('actConf').textContent = a.source === 'ml' ? `AI ${Math.round(a.conf * 100)}% sure`
-    : a.source === 'thresholds' ? 'threshold rules' : a.source === 'sim' ? 'simulated' : 'no motion sensor';
+    : a.source === 'thresholds' ? 'threshold rules' : a.source === 'sim' ? 'simulated' : a.source === 'none' ? 'no motion sensor' : (a.label || a.source || '');
 
   if (pet.isEgg) { $('leanName').textContent = 'hatching'; $('evoEta').textContent = 'keep it with you'; }
   else if (pet.form === 'baby') {
@@ -182,7 +199,7 @@ let walkX = 32, walkDir = 1;
 
 function draw(now) {
   const g = scene, W = 96, H = 64;
-  const act = detector.last.act;
+  const act = activity().act;
   const form = pet.form;
   g.fillStyle = form === 'frost' ? '#0d3040' : form === 'glitch' ? '#1a0d2e' : '#0d2a36';
   g.fillRect(0, 0, W, H);
@@ -241,7 +258,19 @@ function draw(now) {
   requestAnimationFrame(draw);
 }
 
-// Professor Floe portrait, 16x16 (original pixel art: penguin with round glasses).
+// Professor Floe portrait: Daniel's sprites/professor.png if it exists, else the inline 16x16 face.
+function loadProfessor() {
+  const im = new Image();
+  im.onload = () => {
+    const c = $('profFace');
+    c.width = im.naturalWidth; c.height = im.naturalHeight;
+    c.getContext('2d').drawImage(im, 0, 0);
+  };
+  im.onerror = drawProfessor;
+  im.src = 'sprites/professor.png';
+}
+
+// Original pixel art: penguin with round glasses.
 function drawProfessor() {
   const art = [
     '.....######.....',
@@ -334,6 +363,7 @@ function stopRecording(done) {
 }
 
 function onWindow(f, result) {
+  emit('activity:window', { f, result });
   if (f) {
     const probs = result.probs ? '\n' + ACTS.map((a, i) => `${a.padEnd(6)} ${(result.probs[i] * 100).toFixed(0)}%`).join('\n') : '';
     $('liveFeat').textContent = FEATURE_NAMES.map((n, i) => `${n.padEnd(12)} ${f[i].toFixed(3)}`).join('\n') + `\n-> ${result.rawAct} (${result.source})` + probs;
@@ -354,8 +384,7 @@ function trainModel() {
   setTimeout(() => {
     const m = new MLP();
     const s = m.train(dataset, { epochs: 400 });
-    model = m; store.set('model', m.toJSON());
-    settings.useModel = true; saveSettings(); applyModel();
+    setModel(m, 'local');
     const pct = (v) => v == null ? 'n/a' : Math.round(v * 100) + '%';
     const rows = ACTS.map((t, i) => `<tr><th>${t}</th>${s.confusion[i].map((v) => `<td>${v}</td>`).join('')}</tr>`).join('');
     $('trainOut').innerHTML = `<p><b>Validation accuracy ${pct(s.valAcc)}</b> (train ${pct(s.trainAcc)}), ${s.nTrain} train / ${s.nVal} held-out windows. Model is live.</p>
@@ -379,16 +408,48 @@ async function keepAwake() {
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { keepAwake(); lastTick = performance.now(); } });
 
+// ---------------------------------------------------------------- tabs (features unhide their own)
+function openTab(name) {
+  document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x.dataset.tab === name));
+  document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('hidden', p.id !== 'tab-' + name));
+}
+function showTab(name, show = true) {
+  const b = document.querySelector(`.tabs button[data-tab="${name}"]`);
+  if (b) b.classList.toggle('hidden', !show);
+}
+
+function deviceId() {
+  let id = store.get('deviceId', null);
+  if (!id) {
+    id = crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
+    store.set('deviceId', id);
+  }
+  return id;
+}
+
+// The shared context every feature gets (see ctx.js).
+function fillCtx() {
+  Object.assign(ctx, {
+    pet, detector, store, settings, saveSettings,
+    getModel: () => model, setModel,
+    setActivitySource(src) { activitySource = src || null; renderStatus(); },
+    getActivity: activity,
+    getDataset: () => dataset,
+    addData(rows) { dataset = dataset.concat(rows); store.set('dataset', dataset); countData(); },
+    toast, bubble, say: (text) => say(text, false), chirp, vibrate,
+    showTab, openTab, render: renderStatus,
+    deviceId: deviceId(),
+    bus: { on, off, emit },
+  });
+}
+
 // ---------------------------------------------------------------- wiring
 function wire() {
   holdable($('btnA'), feed, feed);
   holdable($('btnB'), play, play);
   holdable($('btnC'), () => setDemo(!settings.demo), evolveNow);
 
-  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
-    document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
-    document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('hidden', p.id !== 'tab-' + b.dataset.tab));
-  }));
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => openTab(b.dataset.tab)));
 
   $('btnDex').onclick = () => askDex(false);
   $('btnCoach').onclick = () => askCoach('checkin', false);
@@ -442,13 +503,15 @@ function wire() {
 }
 
 async function boot() {
-  drawProfessor();
+  loadProfessor();
   wire();
   renderHistory();
   if (dexHistory[0]) $('dexText').textContent = dexHistory[0].text;
   countData();
   await Promise.all([loadSprites(), loadModel()]);
   detector.onWindow = onWindow;
+  fillCtx();
+  initFeatures(ctx);   // not awaited: a slow feature never delays the pet
   renderStatus();
   requestAnimationFrame(draw);
 
