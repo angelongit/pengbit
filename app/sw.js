@@ -1,6 +1,6 @@
 // Offline cache for the app shell. API calls always go to the network.
 // Bump on every change so phones pick up new code (pengbit-v3, v4, ...).
-const CACHE = 'pengbit-v21-campus';
+const CACHE = 'pengbit-v22-posturemodel';
 const SHELL = ['./', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/main.js', 'js/pet.js', 'js/activity.js', 'js/pose.js', 'js/sprites.js', 'js/sprites-builtin.js', 'js/audio.js', 'js/ai.js',
   'js/bus.js', 'js/ctx.js', 'js/features.js', 'js/campus.js', 'js/pip.js', 'css/pip.css', 'js/mood.js', 'js/mirror.js', 'js/names.js', 'css/names.css', 'js/exercise.js', 'js/reps.js',
