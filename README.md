@@ -1,39 +1,96 @@
 # Pengbit
 
-A handheld pocket penguin that evolves based on how you move. Built at **tidalByte 26** (Texas A&M, Nov 21 2026), and inspired by TIDAL's penguin mascot.
+**A pixel penguin that only thrives when you move.** Pengbit is a playful companion for students who spend long stretches sitting. It turns movement and posture into pet growth, gentle break reminders, and a measurable wellness signal.
 
-Pengbit lives on a tiny OLED in a 3D printed shell. It watches the motion sensor (walking, shaking, sitting still), and its happiness and energy change with what you do. After enough activity it evolves into one of three forms. A laptop companion page connects over Bluetooth, shows the pet's stats, and has a "professor" write a dex entry for each new form with an LLM.
+Built for **tidalByte 26 at Texas A&M — November 21, 2026**.
 
-Pengbit and its evolved forms are original designs.
+## The problem
+
+Students can lose track of how long they have been sitting while studying. Step counters alone do not address desk posture or make a study break feel rewarding. Pengbit gives that behavior a visible companion: it reacts to activity, shivers after a long sitting streak, and celebrates when a nudge is followed by movement.
+
+## Try Pengbit in 30 seconds
+
+1. Open the deployed app on a phone over HTTPS.
+2. Tap **Wake Pengbit** and grant motion permission.
+3. Use **Setup → Simulate** on a desktop, or walk with the phone to see the activity change.
+4. Open **Professor** and ask for a field note or coaching tip.
+
+Add the app to your phone's home screen to use it like a pocket pet. A QR demo page is available at app/demo.html when deployed.
+
+## How it works
+
+```text
+Phone accelerometer ──> 2 s feature windows ──> activity classifier ─┐
+                                                                    ├─> Pet state
+Laptop webcam ──> local pose landmarks ──> posture classifier ──────┘
+                                                                      |
+                                      sitting streak ──> gentle nudge |
+                                      walk / upright / slouch ──> pet form
+                                                                      |
+                                      pet summary ──> Professor Liveoak
+                                                       ├─> Claude text
+                                                       └─> ElevenLabs voice
+```
+
+### Pet forms
+
+- **Sprinter**: shaped by walking and taking breaks.
+- **Frost**: shaped by long stretches of sitting still or upright desk work.
+- **Glitch**: shaped by shaking events on the phone or slouching in Desk mode.
+
+Pengbit's key impact metric is **nudges answered**: a sitting nudge followed by a walk or verified exercise break.
+
+## Machine learning and computer vision
+
+- Phone mode extracts motion features from accelerometer windows and classifies walk, still, or shake with a small neural network trained in the browser. Threshold rules provide a fallback.
+- Desk mode uses MediaPipe Pose Landmarker to estimate upright, slouch, or away from normalized body landmarks. Video frames are processed locally and are not uploaded.
+- Final measured model accuracy: **[FILL IN]**. Nudges answered: **[FILL IN]**. Replace these placeholders with measured demo results.
+
+## Professor Liveoak and AI
+
+Professor Liveoak is a warm, slightly dramatic penguin researcher. Claude generates the Pengbit Index entries and short coaching messages from the pet's summary. ElevenLabs provides speech and optional live conversational voice. The serverless API routes keep provider API keys on the server.
+
+## Privacy
+
+- Phone motion data is processed in the browser on the phone.
+- Desk-mode camera frames are processed locally; video never leaves the laptop.
+- Pet stats are sent to the AI service when a user requests Professor Liveoak content.
+- Live voice chat sends microphone audio to ElevenLabs while the conversation is active.
+- No API keys belong in client code or Git.
 
 ## Team
 
-- **Angel**: hardware and firmware
-- **Daniel**: companion web page, pixel art, AI
+- **Angel**: application integration, firmware, and machine learning.
+- **Daniel**: pixel art, Professor Liveoak prompts and voice, and the floating companion window.
 
-## Repo layout
+## Tech stack
 
-| Folder | What's in it |
+HTML, CSS, JavaScript ES modules, Progressive Web App APIs, browser sensors, MediaPipe Tasks Vision, browser-trained MLP, Vercel serverless functions, Claude, and ElevenLabs.
+
+## Repository layout
+
+- app/: deployed web application.
+- app/js/: pet, motion, pose, and feature modules.
+- app/api/: serverless AI endpoints.
+- app/sprites/: pixel-art forms and Professor Liveoak portrait.
+- firmware/: original handheld firmware and hardware tests.
+- shell/: enclosure CAD and print files.
+- docs/: wiring, project notes, and pitch materials.
+
+## Deploy notes
+
+The Vercel project can use the repository root with the included vercel.json rewrites, or use app as the project root as described in app/README.md. Keep the selected Vercel root directory consistent with the API route layout.
+
+Server environment variables (never commit values):
+
+| Variable | Purpose |
 |---|---|
-| `firmware/` | Arduino code for the XIAO nRF52840 Sense. `tests/` holds hardware check sketches; `pet/` is the real sketch (written at the event). |
-| `web/` | Companion page (Web Bluetooth + LLM dex entries). |
-| `shell/` | OpenSCAD model, ready-to-print STLs and renders of the case. |
-| `docs/` | Wiring, the Bluetooth message format and the day plan. |
+| ANTHROPIC_API_KEY | Professor Liveoak text generation |
+| PENGBIT_MODEL | Optional Claude model override |
+| ELEVENLABS_API_KEY | ElevenLabs TTS and signed voice-session requests |
+| ELEVENLABS_VOICE_ID | Optional TTS voice selection |
+| ELEVENLABS_AGENT_ID | Private Conversational AI agent used by Talk |
 
-## Hardware
+For W4 live voice chat, create an ElevenLabs Conversational AI agent using the setup and persona in docs/professor-floe-agent.md. Define these dynamic variables: name, formName, happiness, energy, walkMinutes, stillMinutes, shakeMinutes, stillStreakMinutes, nudges, nudgesAnswered, and mode. Set its ID as ELEVENLABS_AGENT_ID in Vercel. The server requests a signed URL; the browser never receives the API key.
 
-- Seeed Studio XIAO nRF52840 **Sense** (IMU + BLE)
-- 0.96" SSD1306 OLED, 128x64, I2C at 0x3C
-- EEMB 1100 mAh LiPo (LP603449) on the XIAO BAT pads through a JST-PH socket, with an SS12D00 slide switch
-- Active buzzer driven by an NPN transistor
-- 3 tact buttons: A (menu), B (select), C (demo mode)
-
-- 3D printed case, 46 x 90 x 18.5 mm (`shell/`)
-
-See [docs/wiring.md](docs/wiring.md) for the parts, pin map and power wiring.
-
-## Getting started
-
-**Firmware:** see [firmware/README.md](firmware/README.md) for the board package and libraries, then flash the sketches in `firmware/tests/` one at a time to check each part.
-
-**Web:** see [web/README.md](web/README.md).
+For local static testing from app/, run npx serve . Motion and camera permissions require a secure context (HTTPS or localhost). Use a real phone over cellular for final testing; event Wi-Fi may interfere with the deployed Vercel HTTPS URL.

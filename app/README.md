@@ -19,6 +19,9 @@ tap **Wake Pengbit**, and the phone's motion sensor feeds the pet. Add it to the
   browser's speech voice, so the demo never breaks.
 - **No phone?** Setup -> Simulate, or keys W / S / K (walk / still / shake), D (demo), E (evolve).
 
+- **Roaming Pengbit**: the ROAM button lets it walk around over the page; the desktop companion in `../desktop/`
+  (Electron, `npm start`) lets it walk over your whole desktop like Clippy. See `desktop/README.md`.
+
 ## Deploy (Vercel, about 2 minutes)
 
 1. vercel.com -> Add New -> Project -> import `angelongit/pengbit`.

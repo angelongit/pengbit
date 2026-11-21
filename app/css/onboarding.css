@@ -1,0 +1,8 @@
+/* W8 first-run introduction. */
+.onboard { max-width:360px; margin:0 auto 18px; padding:20px 18px; text-align:left; border:2px solid var(--plastic-edge); border-radius:20px; background:linear-gradient(145deg,rgba(11,31,62,.94),rgba(34,22,83,.94)); box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),0 12px 32px #0006; }
+.onboard-count,.onboard-tag { color:var(--lcd-ink); font:9px/1.7 var(--pix); letter-spacing:.04em; }
+.onboard-count { margin:0 0 14px; opacity:.75; } .onboard-tag { margin:0 0 10px; }
+.onboard-title { margin:0 0 12px; font:16px/1.5 var(--pix); color:#fff; }
+.onboard-body { margin:0; color:#f3f0ff; font-size:15px; line-height:1.55; }
+.onboard-note { margin:12px 0 18px; color:#9ff3ff; font:20px/1.1 var(--term); }
+.onboard-actions { display:flex; justify-content:space-between; gap:10px; } .onboard-actions button { min-width:108px; }
