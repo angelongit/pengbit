@@ -21,6 +21,11 @@ const FORM_LORE = {
     sprinter: 'Sprinter: sleek and restless, goggles on, raised on lots of walking',
     frost: 'Frost: calm and icy with frosted feathers and sleepy wisdom, raised on long stretches of sitting still',
     glitch: 'Glitch: crackling with scanlines and corrupted pixels, a friendly Y2K bug, raised on lots of shaking',
+    scholar: 'Scholar: graduation cap and a little pixel wand, reads a spellbook when idle, raised by an owner who finished long focus sessions',
+    hunchling: 'Hunchling: curled up under a floppy hat, sleepy, raised by an owner who slouched through most of their desk time; gently encourages a posture reset',
+    trail_mage: 'Trail Mage: tall wizard hat, walking staff and messenger bag, raised by an owner who studied hard and answered their walking breaks',
+    library_sage: 'Library Sage: round glasses and a stack of books, calm page turns, raised by an owner who studied long and sat upright',
+    static_mage: 'Static Mage: bent wizard hat and playful sparks, raised by an owner who studied long but slouched a lot; suggests short posture resets',
   },
   desk: {
     egg: 'not hatched yet',
@@ -28,6 +33,11 @@ const FORM_LORE = {
     sprinter: 'Sprinter: sleek and restless, goggles on, raised by an owner who takes regular breaks from the desk',
     frost: 'Frost: calm and icy with frosted feathers, raised by a focused owner who sits upright',
     glitch: 'Glitch: crackling with scanlines and corrupted pixels, a friendly Y2K bug, raised by an owner who slouches a lot',
+    scholar: 'Scholar: graduation cap and a little pixel wand, reads a spellbook when idle, raised by an owner who finished long focus sessions',
+    hunchling: 'Hunchling: curled up under a floppy hat, sleepy, raised by an owner who slouched through most of their desk time; gently encourages a posture reset',
+    trail_mage: 'Trail Mage: tall wizard hat, walking staff and messenger bag, raised by an owner who studied hard and answered their walking breaks',
+    library_sage: 'Library Sage: round glasses and a stack of books, calm page turns, raised by an owner who studied long and sat upright',
+    static_mage: 'Static Mage: bent wizard hat and playful sparks, raised by an owner who studied long but slouched a lot; suggests short posture resets',
   },
 };
 
