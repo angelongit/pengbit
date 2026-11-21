@@ -24,15 +24,15 @@ Create these agent dynamic variables with the exact names below. They are popula
 | formName | Current form display name |
 | happiness | Happiness from 0 to 100 |
 | energy | Energy from 0 to 100 |
-| walkMinutes | Total walk / away minutes |
-| stillMinutes | Total still / upright minutes |
-| shakeMinutes | Total shake / slouch minutes |
+| minutes.walk | Total walk / away minutes |
+| minutes.still | Total still / upright minutes |
+| minutes.shake | Total shake / slouch minutes |
 | stillStreakMinutes | Current continuous sitting streak |
 | nudges | Total sitting nudges sent |
 | nudgesAnswered | Nudges followed by a walk or qualifying activity |
 | mode | phone or desk |
 
-Use the corresponding placeholders in the agent prompt, for example {{name}}, {{formName}}, {{happiness}}, {{energy}}, {{walkMinutes}}, {{stillMinutes}}, {{shakeMinutes}}, {{stillStreakMinutes}}, {{nudges}}, {{nudgesAnswered}}, and {{mode}}.
+Use double-curly placeholders in the agent prompt, including {{name}}, {{formName}}, {{happiness}}, {{energy}}, {{minutes.walk}}, {{minutes.still}}, {{minutes.shake}}, {{stillStreakMinutes}}, {{nudges}}, {{nudgesAnswered}}, and {{mode}}.
 
 ## Agent configuration checklist
 
