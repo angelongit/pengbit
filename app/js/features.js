@@ -14,6 +14,7 @@ const FEATURES = [
   './mood.js',          // W6 Mood look: glum, scruffy, rounder as joy drops (Daniel)
   './mirror.js',        // W6 Neglect Mirror: zero joy, Pebblebit blames you, webcam morph (Daniel)
   './roam.js',          // Desktop roaming Pebblebit (desktop/ companion + in-page fallback)
+  './focus-timer.js',
 ];
 
 export async function initFeatures(ctx) {

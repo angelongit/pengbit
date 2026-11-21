@@ -56,7 +56,7 @@ body::after {
     radial-gradient(90% 60% at 50% 30%, rgba(0, 168, 168, 0.5), transparent 70%),
     linear-gradient(180deg, #063a5c, #1d1150);
 }
-.start .logo { font-size: clamp(28px, 9vw, 44px); }
+.start .logo { font-size: clamp(20px, 7.2vw, 36px); max-width: 100%; }
 .tag::after { content: "_"; animation: rt-blink 1s steps(1) infinite; }
 @keyframes rt-blink { 50% { opacity: 0; } }
 

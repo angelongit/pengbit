@@ -17,6 +17,7 @@ build/
 # Web
 node_modules/
 dist/
+dist-desktop/
 .next/
 .vite/
 .cache/

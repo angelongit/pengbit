@@ -1,5 +1,6 @@
 // Pebblebit pet rules, ported from the firmware (firmware/pet/pet_state.cpp + config.h).
 // All time is in pet seconds. tick() gets 1 per real second, or DEMO_SPEEDUP in demo mode.
+import { evaluateEvolution, getEvolutionProgress } from './evolutions.js';
 
 export const CFG = {
   DEMO_SPEEDUP: 60,          // demo mode: 1 real s = 60 pet s
@@ -23,11 +24,16 @@ export const CFG = {
 };
 
 export const FORMS = {
-  egg:      { name: 'Egg',              blurb: 'Something is wiggling inside.' },
-  baby:     { name: 'Pebblebit',          blurb: 'A tiny penguin chick made of pixels.' },
-  sprinter: { name: 'Sprinter Pebblebit', blurb: 'Raised on walks. Fast, sleek, always moving.' },
-  frost:    { name: 'Frost Pebblebit',    blurb: 'Raised sitting still. Calm, icy, a little sleepy.' },
-  glitch:   { name: 'Glitch Pebblebit',   blurb: 'Raised on shakes. Crackles with static.' },
+  egg:          { name: 'Egg',                  blurb: 'Something is wiggling inside.' },
+  baby:         { name: 'Pebblebit',            blurb: 'A tiny penguin chick made of pixels.' },
+  sprinter:     { name: 'Sprinter Pebblebit',   blurb: 'Raised on walks. Fast, sleek, always moving.' },
+  frost:        { name: 'Frost Pebblebit',      blurb: 'Raised sitting still. Calm, icy, a little sleepy.' },
+  glitch:       { name: 'Glitch Pebblebit',     blurb: 'Raised on shakes. Crackles with static.' },
+  scholar:      { name: 'Scholar Pebblebit',    blurb: 'Robe, cap, and a pixel wand. Reads a spellbook when idle.' },
+  hunchling:    { name: 'Hunchling Pebblebit',  blurb: 'Curled-up penguin with a drooping hat. Gently encourages a reset.' },
+  trail_mage:   { name: 'Trail Mage Pebblebit', blurb: 'Wizard staff, messenger bag, and a confident stride.' },
+  library_sage: { name: 'Library Sage Pebblebit', blurb: 'Round glasses, book stack, and calm page turns.' },
+  static_mage:  { name: 'Static Mage Pebblebit',  blurb: 'Bent hat and playful sparks. Suggests a short posture reset.' },
 };
 
 // Activity names per mode. Desk mode reuses the same three slots for posture.
@@ -43,6 +49,11 @@ export class Pet {
     this.reset();
     if (saved) Object.assign(this, saved);
     if (this.name === 'Pengbit') this.name = 'Pebblebit';   // old default name, from before the rename
+    // Ensure new fields exist when loading older saves without altering existing evolved pets.
+    this.focus = { credits: 0, completedMinutes: 0, completedSessions: 0, ...(this.focus || {}) };
+    this.desk = { uprightSec: 0, slouchSec: 0, awaySec: 0, ...(this.desk || {}) };
+    this.answeredBy = { walk: 0, exercise: 0, ...(this.answeredBy || {}) };
+    this.evolvedReason = this.evolvedReason || null;
     this.events = [];
   }
 
@@ -65,7 +76,11 @@ export class Pet {
     this.nudgesAnswered = 0;
     this.answeredBy = { walk: 0, exercise: 0 };
     this.exercise = { sessions: 0, reps: 0 };
+    // Separate focus & Desk signals for behavior-based evolutions and session recaps.
+    this.focus = { credits: 0, completedMinutes: 0, completedSessions: 0 };
+    this.desk = { uprightSec: 0, slouchSec: 0, awaySec: 0 };
     this.evolvedAt = null;
+    this.evolvedReason = null;
     this.events = [];
   }
 
@@ -136,20 +151,60 @@ export class Pet {
     if (this.form === 'baby' && this.age >= CFG.EVOLVE_AGE_S && this.happy >= CFG.EVOLVE_MIN_HAPPY) this.evolve();
   }
 
-  dominantForm() {
+  dominantPhoneActivity() {
     const { walk: w, still: s, shake: k } = this.totals;
-    if (w >= k && w >= s) return 'sprinter';   // ties: walk > shake > still
-    if (k >= s) return 'glitch';
+    if (w >= k && w >= s) return 'walk';   // ties: walk > shake > still
+    if (k >= s) return 'shake';
+    return 'still';
+  }
+
+  dominantForm() {
+    const dom = this.dominantPhoneActivity();
+    if (dom === 'walk') return 'sprinter';
+    if (dom === 'shake') return 'glitch';
     return 'frost';
   }
 
-  evolve() {
-    this.form = this.dominantForm();
-    this.evolvedAt = Date.now();
-    this.push('evolved', this.form);
+  // Signals passed to evaluateEvolution() and getEvolutionProgress().
+  evolutionSignals() {
+    return {
+      completedFocusMinutes: this.focus.completedMinutes,
+      completedSessions: this.focus.completedSessions,
+      answeredWalkBreaks: this.answeredBy.walk || 0,
+      desk: this.desk,
+      dominantPhoneActivity: this.dominantPhoneActivity(),
+    };
   }
 
-  // Judge shortcut: evolve now from the current totals, skipping the age and happiness gates.
+  // Record real-time Desk posture observations ('upright' | 'slouch' | 'away') in seconds.
+  recordDeskSeconds(posture, dtSec) {
+    if (!dtSec || dtSec <= 0) return;
+    if (posture === 'upright') this.desk.uprightSec += dtSec;
+    else if (posture === 'slouch') this.desk.slouchSec += dtSec;
+    else if (posture === 'away') this.desk.awaySec += dtSec;
+  }
+
+  // Award focus credits (1 per completed minute) separate from joy/energy.
+  // Demo sessions are excluded from credits and evolution inputs.
+  recordFocusSession({ completedMin = 0, isDemo = false } = {}) {
+    if (isDemo || completedMin <= 0) return 0;
+    const credits = Math.floor(completedMin);
+    this.focus.credits += credits;
+    this.focus.completedMinutes += completedMin;
+    this.focus.completedSessions += 1;
+    return credits;
+  }
+
+  evolve() {
+    const result = evaluateEvolution(this.evolutionSignals());
+    this.form = result.form;
+    this.evolvedReason = result.reason;
+    this.evolvedAt = Date.now();
+    this.push('evolved', this.form);
+    return result;
+  }
+
+  // Judge shortcut: evolve now from the current signals, skipping the age and happiness gates.
   forceEvolve() {
     if (this.isEgg) { this.form = 'baby'; this.age = 0; this.push('hatched'); return true; }
     if (this.form !== 'baby') return false;
@@ -196,10 +251,12 @@ export class Pet {
   // Facts the AI professor gets for dex entries and coaching.
   summary() {
     const min = (s) => Math.round(s / 60);
+    const meta = FORMS[this.form] || FORMS.baby;
     return {
       name: this.name,
       form: this.form,
-      formName: FORMS[this.form].name,
+      formName: meta.name,
+      evolvedReason: this.evolvedReason,
       ageMinutes: min(this.age),
       happiness: this.happy,
       energy: this.energy,
@@ -208,6 +265,13 @@ export class Pet {
       nudges: this.nudges,
       nudgesAnswered: this.nudgesAnswered,
       exercise: { sessions: this.exercise.sessions, reps: this.exercise.reps },
+      focus: { ...this.focus },
+      desk: {
+        uprightMin: +(this.desk.uprightSec / 60).toFixed(1),
+        slouchMin: +(this.desk.slouchSec / 60).toFixed(1),
+        awayMin: +(this.desk.awaySec / 60).toFixed(1),
+      },
+      evolutionProgress: getEvolutionProgress(this.evolutionSignals()),
       mode: this.mode,
     };
   }
