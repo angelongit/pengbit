@@ -1,6 +1,6 @@
 // W4: push-to-talk conversation with Professor Floe.
 // The browser receives only a short-lived signed URL; ELEVENLABS_API_KEY stays server-side.
-const SDK_URL = 'https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.36.1/+esm';
+const SDK_URL = 'https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.37.1/+esm';
 const TOKEN_URL = '/api/talk-token';
 const TOKEN_MAX_AGE = 10 * 60 * 1000;
 
