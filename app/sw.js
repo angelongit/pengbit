@@ -1,9 +1,9 @@
 // Offline cache for the app shell. API calls always go to the network.
 // Bump on every change so phones pick up new code (pengbit-v3, v4, ...).
-const CACHE = 'pengbit-v8-liveoak-vars';
+const CACHE = 'pengbit-v9-liveoak-vars';
 const SHELL = ['./', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/main.js', 'js/pet.js', 'js/activity.js', 'js/pose.js', 'js/sprites.js', 'js/sprites-builtin.js', 'js/audio.js', 'js/ai.js',
-  'js/bus.js', 'js/ctx.js', 'js/features.js', 'js/pip.js', 'css/pip.css', 'js/exercise.js',
+  'js/bus.js', 'js/ctx.js', 'js/features.js', 'js/pip.js', 'css/pip.css', 'js/exercise.js', 'js/reps.js',
   'js/desk.js', 'js/posture.js',
   'js/flock.js', 'js/flock-core.js', 'js/fedavg.js', 'flock.html', 'js/flock-screen.js', 'js/flock-sim.js', 'js/vendor/qrcode.js', 'css/flock-screen.css',
   'css/flock.css', 'css/move.css', 'css/insights.css', 'css/talk.css', 'css/desk.css', 'css/campus.css',
