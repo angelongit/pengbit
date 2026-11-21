@@ -56,7 +56,7 @@ body { font: 11px/1.3 "Lucida Console", "Courier New", monospace; color: var(--i
 .pip-status { display: flex; justify-content: space-between; font-size: 10px; color: #3a4654; }
 .pip-name { font-weight: bold; }
 
-/* Professor Floe, Clippy style: portrait plus a yellow tooltip bubble */
+/* Professor Liveoak, Clippy style: portrait plus a yellow tooltip bubble */
 .pip-prof { display: grid; grid-template-columns: 40px 1fr; gap: 6px; align-items: end; }
 .pip-face {
   width: 40px; height: 40px; image-rendering: pixelated; background: var(--screen);

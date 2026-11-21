@@ -1,6 +1,6 @@
 // Pengbit's floating window (Daniel, W6): a Y2K mini window that stays on top of your homework,
 // using Chrome's Document Picture-in-Picture API. Shows the pet, its stats and posture, and
-// Professor Floe's lines in a Clippy-style speech bubble.
+// Professor Liveoak's lines in a Clippy-style speech bubble.
 // If Picture-in-Picture isn't available (Safari, Firefox, phones), the button never appears and
 // Pengbit simply stays in the normal tab.
 //

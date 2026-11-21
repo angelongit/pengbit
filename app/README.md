@@ -14,7 +14,7 @@ tap **Wake Pengbit**, and the phone's motion sensor feeds the pet. Add it to the
   (deviation from 1 g, jerk, per-axis spread, step periodicity, ...) -> a small neural network (12 -> 16 -> 3)
   trained in the browser on your own recordings (Train AI tab), with held-out validation accuracy and a confusion
   matrix. Threshold rules are the fallback when there's no model.
-- **Professor Floe** (`js/ai.js`, `api/`): dex entries and coaching from Claude, voice from ElevenLabs, both
+- **Professor Liveoak** (`js/ai.js`, `api/`): dex entries and coaching from Claude, voice from ElevenLabs, both
   through serverless functions so no keys ship to the phone. Without keys it falls back to offline text and the
   browser's speech voice, so the demo never breaks.
 - **No phone?** Setup -> Simulate, or keys W / S / K (walk / still / shake), D (demo), E (evolve).

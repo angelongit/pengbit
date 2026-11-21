@@ -11,7 +11,7 @@ firmware's 1-bit placeholders (`js/sprites-builtin.js`).
 | `frost_a.png`, `frost_b.png` | evolved from sitting still (phone) or sitting upright (desk) |
 | `glitch_a.png`, `glitch_b.png` | evolved from shaking (phone) or slouching (desk) |
 | `slouch_a.png`, `slouch_b.png` | Desk mode reaction while the owner slouches (shown by the floating window, `js/pip.js`) |
-| `professor.png` | Professor Floe's portrait (loaded by `main.js`, falls back to the inline 16x16 face) |
+| `professor.png` | Professor Liveoak's portrait (loaded by `main.js`, falls back to the inline 16x16 face) |
 
 - 32x32 px, transparent background, full color. `_a` / `_b` are the two animation frames.
 - Drawn for the dark teal screen (`#0d2a36`): light outlines, dark navy hood, white face and belly.

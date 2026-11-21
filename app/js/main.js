@@ -75,7 +75,7 @@ function fmtAge(s) {
 // ---------------------------------------------------------------- professor
 async function askDex(auto = false) {
   const el = $('dexText');
-  el.classList.add('loading'); el.textContent = 'Professor Floe is writing...';
+  el.classList.add('loading'); el.textContent = 'Professor Liveoak is writing...';
   const { text, source } = await dexEntry(pet.summary());
   el.classList.remove('loading'); el.textContent = text;
   $('aiSource').textContent = source === 'ai' ? 'Written by the AI professor.' : 'Offline entry (AI proxy not set up yet).';
@@ -258,7 +258,7 @@ function draw(now) {
   requestAnimationFrame(draw);
 }
 
-// Professor Floe portrait: Daniel's sprites/professor.png if it exists, else the inline 16x16 face.
+// Professor Liveoak portrait: Daniel's sprites/professor.png if it exists, else the inline 16x16 face.
 function loadProfessor() {
   const im = new Image();
   im.onload = () => {

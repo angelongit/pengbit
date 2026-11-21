@@ -19,6 +19,6 @@
 #tab-talk .talk-line b { color:#9ff3ff; font:9px 'Press Start 2P',monospace; }
 #tab-talk .talk-line span { font:19px/1.2 'VT323',monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
 #tab-talk .talk-line.you { border-left:3px solid #ff9fe7; }
-#tab-talk .talk-line.floe { border-left:3px solid #8eeaff; }
+#tab-talk .talk-line.liveoak { border-left:3px solid #8eeaff; }
 #tab-talk .talk-end { margin-top:10px; }
 #tab-talk .talk-foot { margin:12px 0 0; color:var(--muted); font-size:11px; }
