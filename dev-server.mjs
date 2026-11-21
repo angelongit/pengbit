@@ -9,21 +9,22 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // Repo root: the folder holding app/. Prefer this script's folder, then the current folder.
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = [HERE, process.cwd()].find((d) => fs.existsSync(path.join(d, 'app', 'index.html'))) || HERE;
-const APP = path.join(ROOT, 'app');
-const PORT = Number(process.env.PORT || 3000);
 
 // ---- .env.local / .env (simple KEY=value lines; existing env wins)
 // Also accepts .env.local.txt, which Windows Notepad creates when "Save as type" is left on Text Documents.
-const envFiles = [];
-for (const name of ['.env.local', '.env.local.txt', '.env', '.env.txt']) for (const dir of [...new Set([ROOT, process.cwd()])]) {
-  const file = path.join(dir, name);
-  if (!fs.existsSync(file)) continue;
-  envFiles.push(path.join(dir, name));
-  for (const line of fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '').split(/\r?\n/)) {
-    const m = line.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
-    if (!m || process.env[m[1]] !== undefined) continue;
-    process.env[m[1]] = m[2].replace(/^(['"])(.*)\1$/, '$2');
+function loadEnv(dirs) {
+  const envFiles = [];
+  for (const name of ['.env.local', '.env.local.txt', '.env', '.env.txt']) for (const dir of new Set(dirs)) {
+    const file = path.join(dir, name);
+    if (!fs.existsSync(file)) continue;
+    envFiles.push(file);
+    for (const line of fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '').split(/\r?\n/)) {
+      const m = line.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+      if (!m || process.env[m[1]] !== undefined) continue;
+      process.env[m[1]] = m[2].replace(/^(['"])(.*)\1$/, '$2');
+    }
   }
+  return envFiles;
 }
 
 const MIME = {
@@ -53,10 +54,10 @@ async function readBody(req) {
   return raw;
 }
 
-async function handleApi(req, res, url) {
+async function handleApi(req, res, url, appDir) {
   const name = url.pathname.slice('/api/'.length).replace(/\/+$/, '');
   if (!/^[a-z0-9-]+$/i.test(name)) return res.status(404).json({ error: 'not found' });
-  const file = path.join(APP, 'api', name + '.js');
+  const file = path.join(appDir, 'api', name + '.js');
   if (!fs.existsSync(file)) return res.status(404).json({ error: 'not found' });
   req.query = Object.fromEntries(url.searchParams);
   req.body = await readBody(req);
@@ -69,12 +70,13 @@ async function handleApi(req, res, url) {
   }
 }
 
-function serveStatic(req, res, url) {
+function serveStatic(req, res, url, appDir) {
   let rel = decodeURIComponent(url.pathname);
   if (rel.startsWith('/app/')) rel = rel.slice(4);
   if (rel.endsWith('/')) rel += 'index.html';
-  const file = path.normalize(path.join(APP, rel));
-  if (!file.startsWith(APP)) return res.status(403).end();
+  const file = path.normalize(path.join(appDir, rel));
+  const relative = path.relative(appDir, file);
+  if (relative.startsWith('..' + path.sep) || relative === '..' || path.isAbsolute(relative)) return res.status(403).end();
   fs.stat(file, (err, st) => {
     if (err || !st.isFile()) return res.status(404).send('not found');
     res.setHeader('content-type', MIME[path.extname(file).toLowerCase()] || 'application/octet-stream');
@@ -83,22 +85,50 @@ function serveStatic(req, res, url) {
   });
 }
 
-http.createServer((req, res) => {
-  wrapRes(res);
-  const url = new URL(req.url, 'http://localhost');
-  if (url.pathname.startsWith('/api/')) return handleApi(req, res, url);
-  serveStatic(req, res, url);
-}).listen(PORT, () => {
-  console.log(`\nPebblebit running at http://localhost:${PORT}\n`);
-  console.log(`  app folder: ${APP}${fs.existsSync(path.join(APP, 'index.html')) ? '' : '  (NOT FOUND: run this from the pengbit repo folder)'}`);
-  console.log(`  key file: ${envFiles.length ? envFiles.join(', ') : 'NONE FOUND in ' + ROOT}`);
+export async function startLocalServer({
+  root = ROOT, port = Number(process.env.PORT || 3000), host,
+  envDirs = [root, process.cwd()], verbose = false
+} = {}) {
+  const appDir = path.join(root, 'app');
+  const envFiles = loadEnv(envDirs);
+  const origin = `http://${host || 'localhost'}:${port}`;
+  const server = http.createServer((req, res) => {
+    wrapRes(res);
+    if (host && req.headers.host !== `${host}:${port}`) {
+      return res.status(403).json({ error: 'Use the local Pebblebit app' });
+    }
+    const url = new URL(req.url, origin);
+    if (url.pathname.startsWith('/api/')) {
+      if (host && req.headers.origin && req.headers.origin !== origin) {
+        return res.status(403).json({ error: 'Use the local Pebblebit app' });
+      }
+      return handleApi(req, res, url, appDir);
+    }
+    serveStatic(req, res, url, appDir);
+  });
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, host, () => {
+      server.off('error', reject);
+      resolve();
+    });
+  });
+  if (!verbose) return server;
+  console.log(`\nPebblebit running at ${origin}\n`);
+  console.log(`  app folder: ${appDir}${fs.existsSync(path.join(appDir, 'index.html')) ? '' : '  (NOT FOUND: run this from the pengbit repo folder)'}`);
+  console.log(`  key file: ${envFiles.length ? envFiles.join(', ') : 'NONE FOUND in ' + root}`);
   const has = (k) => (process.env[k] ? 'set' : 'MISSING');
   console.log(`  ELEVENLABS_API_KEY  ${has('ELEVENLABS_API_KEY')}`);
   console.log(`  ELEVENLABS_AGENT_ID ${has('ELEVENLABS_AGENT_ID')}`);
   console.log(`  ANTHROPIC_API_KEY   ${has('ANTHROPIC_API_KEY')}`);
   console.log(`  GEMINI_API_KEY      ${has('GEMINI_API_KEY')}  (dex/coach need one of these two)\n`);
-  selfTest();
-});
+  void selfTest();
+  return server;
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await startLocalServer({ verbose: true });
+}
 
 // Tells you right away if this network blocks the AI services (e.g. school Wi-Fi intercepting TLS).
 async function selfTest() {

@@ -1,0 +1,19 @@
+:root { background: #c8c8cf; color: #191b38; font: 13px/1.35 "Lucida Console", monospace; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.assistant { min-height: 100vh; padding: 5px; border: 3px outset #e4e5ee; }
+header { display: flex; align-items: center; justify-content: space-between; background: #243e89; color: white; padding: 3px 4px 3px 7px; }
+h1 { margin: 0; font-size: 13px; }
+button { font: inherit; border: 2px outset #eef0f6; color: #191b38; background: #dedee6; cursor: pointer; }
+button:active { border-style: inset; }
+button:focus-visible { outline: 2px solid #e29919; outline-offset: 1px; }
+header button { width: 23px; height: 22px; font-size: 17px; line-height: 1; }
+.pet { display: flex; align-items: center; gap: 9px; margin: 6px 0; padding: 3px 8px; background: #0d2a36; color: #d0f6ff; border: 2px inset #8196a8; min-height: 58px; }
+.pet canvas { flex: none; width: 96px; height: 64px; image-rendering: pixelated; }
+.pet div { min-width: 0; }
+.pet strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pet p { margin: 0; font-size: 12px; }
+#focus-clock { font-weight:bold; color:#a3f2d8; }
+#message { height: 58px; overflow: auto; overflow-wrap: anywhere; margin: 0; padding: 5px 7px; background: #fff4c6; border: 1px solid #9a873f; }
+footer { display:flex; gap:5px; margin-top: 6px; }
+footer button { padding: 2px 7px; }

@@ -2,19 +2,22 @@
 //
 // Two windows:
 //   app      the normal Pebblebit web app (pet engine, Desk-mode webcam posture, Professor Liveoak).
-//   overlay  a transparent, frameless, always-on-top window over the whole screen that loads
-//            /roam.html. Pebblebit walks along the bottom of the screen (on top of the taskbar/dock),
-//            hops, chases your cursor and nags you, over every other app. It is click-through
-//            everywhere except the penguin itself, so you can still use your computer.
+//   overlay  either a compact, always-on-top corner assistant or the click-through roaming layer.
 // Both load the same origin, so the app streams the pet's state to the overlay over BroadcastChannel.
 //
-// Run:  npm install  then  npm start                     (uses http://localhost:3000, start `npm run local` in the repo root first)
+// Run:  npm install  then  npm start                     (starts the bundled local server)
 //       npm start -- --url=https://pengbit.vercel.app    (or set PENGBIT_URL)
-const { app, BrowserWindow, ipcMain, screen, session, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, session, Tray, Menu, nativeImage, dialog } = require('electron');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 
 const argUrl = process.argv.find((a) => a.startsWith('--url='));
-const APP_URL = (argUrl ? argUrl.slice(6) : process.env.PENGBIT_URL || 'http://localhost:3000').replace(/\/+$/, '');
+const externalUrl = argUrl ? argUrl.slice(6) : process.env.PENGBIT_URL;
+const localHost = '127.0.0.1';
+const localPort = 47826;
+const APP_URL = (externalUrl || `http://${localHost}:${localPort}`).replace(/\/+$/, '');
+const APP_ORIGIN = new URL(APP_URL).origin;
+const DOCK = { width: 292, height: 218, inset: 12 };
 
 if (process.platform === 'linux') {             // transparent windows on Linux
   app.commandLine.appendSwitch('enable-transparent-visuals');
@@ -22,7 +25,36 @@ if (process.platform === 'linux') {             // transparent windows on Linux
 }
 if (!app.requestSingleInstanceLock()) app.quit();
 
-let win = null, overlay = null, tray = null, cursorTimer = null, roaming = true;
+let win = null, overlay = null, tray = null, cursorTimer = null, mode = 'dock';
+let lastMode = 'dock';
+let localServer;
+
+async function startBundledApp() {
+  if (externalUrl) return;
+  const root = path.join(__dirname, '..');
+  const envDirs = app.isPackaged
+    ? [process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath), app.getPath('userData')]
+    : [root];
+  const { startLocalServer } = await import(pathToFileURL(path.join(root, 'dev-server.mjs')).href);
+  localServer = await startLocalServer({ root, host: localHost, port: localPort, envDirs });
+}
+
+function appOrigin(url) {
+  try { return new URL(url).origin === APP_ORIGIN; }
+  catch { return false; }
+}
+
+function fromWindow(event, window) {
+  return window && event.sender === window.webContents
+    && event.senderFrame === event.sender.mainFrame && appOrigin(event.senderFrame.url);
+}
+
+function showApp() {
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
+}
 
 function failPage(url, err) {
   const html = `<body style="font:15px system-ui;background:#0d2a36;color:#e8f4ff;padding:30px">
@@ -44,77 +76,124 @@ function createAppWindow() {
     if (!isMain || code === -3) return;                  // -3 = aborted (normal navigation)
     win.loadURL(failPage(APP_URL, desc));
     clearTimeout(retry);
-    retry = setTimeout(() => { win.loadURL(APP_URL); overlay?.loadURL(APP_URL + '/roam.html'); }, 3000);
+    retry = setTimeout(() => { win?.loadURL(APP_URL); }, 3000);
+  });
+  win.webContents.on('did-finish-load', () => {
+    if (appOrigin(win.webContents.getURL()) && mode !== 'hidden' && !overlay) createOverlay();
   });
   win.loadURL(APP_URL);
-  win.on('closed', () => { win = null; app.quit(); });
+  win.on('closed', () => { clearTimeout(retry); win = null; app.quit(); });
+}
+
+function companionBounds() {
+  const { workArea } = win && !win.isMinimized()
+    ? screen.getDisplayMatching(win.getBounds()) : screen.getPrimaryDisplay();
+  if (mode === 'roam') return workArea;
+  const width = Math.min(DOCK.width, workArea.width);
+  const height = Math.min(DOCK.height, workArea.height);
+  return {
+    width, height,
+    x: Math.max(workArea.x, workArea.x + workArea.width - width - DOCK.inset),
+    y: Math.max(workArea.y, workArea.y + workArea.height - height - DOCK.inset)
+  };
 }
 
 function createOverlay() {
-  const { workArea } = screen.getPrimaryDisplay();
-  overlay = new BrowserWindow({
-    ...workArea, frame: false, transparent: true, backgroundColor: '#00000000', hasShadow: false,
+  const roam = mode === 'roam';
+  const companion = overlay = new BrowserWindow({
+    ...companionBounds(), title: roam ? 'Pebblebit Roam' : 'Pebblebit Assistant',
+    frame: false, transparent: roam, backgroundColor: roam ? '#00000000' : '#c8c8cf', hasShadow: !roam,
     resizable: false, movable: false, minimizable: false, maximizable: false, fullscreenable: false,
-    skipTaskbar: true, focusable: false, alwaysOnTop: true, show: false,
+    skipTaskbar: true, focusable: !roam, alwaysOnTop: true, show: false,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), backgroundThrottling: false },
   });
-  overlay.setAlwaysOnTop(true, 'screen-saver');
-  overlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  overlay.setIgnoreMouseEvents(true, { forward: true });
-  overlay.loadURL(APP_URL + '/roam.html');
-  overlay.once('ready-to-show', () => { if (roaming) overlay.showInactive(); });
-  overlay.on('closed', () => { overlay = null; });
-
-  // Feed the cursor position to the page so Pebblebit can chase it and so the page knows when the
-  // pointer is over the penguin (it then turns click-through off for that moment).
-  clearInterval(cursorTimer);
-  cursorTimer = setInterval(() => {
-    if (!overlay || !overlay.isVisible()) return;
-    const p = screen.getCursorScreenPoint(), b = overlay.getBounds();
-    overlay.webContents.send('cursor', { x: p.x - b.x, y: p.y - b.y });
-  }, 33);
+  companion.setAlwaysOnTop(true, roam ? 'screen-saver' : 'floating');
+  companion.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: roam });
+  if (roam) {
+    companion.setIgnoreMouseEvents(true, { forward: true });
+    cursorTimer = setInterval(() => {
+      if (!companion.isVisible()) return;
+      const p = screen.getCursorScreenPoint(), b = companion.getBounds();
+      companion.webContents.send('cursor', { x: p.x - b.x, y: p.y - b.y });
+    }, 33);
+  }
+  companion.once('ready-to-show', () => { if (overlay === companion) companion.showInactive(); });
+  companion.on('closed', () => {
+    if (overlay === companion) {
+      overlay = null;
+      clearInterval(cursorTimer);
+    }
+  });
+  companion.loadURL(APP_URL + (roam ? '/roam.html' : '/dock.html')).catch(error => {
+    if (overlay !== companion) return;
+    console.warn('Pebblebit assistant could not load:', error.message);
+    companion.destroy();
+  });
 }
 
 function fitOverlay() {
-  if (overlay) overlay.setBounds(screen.getPrimaryDisplay().workArea);
+  if (overlay) overlay.setBounds(companionBounds());
 }
 
-function setRoaming(on) {
-  roaming = on;
-  if (!overlay) createOverlay();
-  if (on) overlay.showInactive(); else overlay.hide();
-  win?.webContents.send('roam:changed', on);
+function setMode(next) {
+  if (next !== mode || !overlay) {
+    clearInterval(cursorTimer);
+    overlay?.destroy();
+    mode = next;
+    if (next !== 'hidden') {
+      lastMode = next;
+      if (win && appOrigin(win.webContents.getURL())) createOverlay();
+    }
+  }
+  win?.webContents.send('roam:changed', mode === 'roam');
   updateTray();
-  return on;
+  return mode === 'roam';
 }
 
 function updateTray() {
   if (!tray) return;
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Show Pebblebit app', click: () => { win?.show(); win?.focus(); } },
-    { label: roaming ? 'Catch Pebblebit (stop roaming)' : 'Let Pebblebit roam', click: () => setRoaming(!roaming) },
+    { label: 'Show Pebblebit app', click: showApp },
+    { label: 'Docked assistant', type: 'radio', checked: mode === 'dock', click: () => setMode('dock') },
+    { label: 'Roam the desktop', type: 'radio', checked: mode === 'roam', click: () => setMode('roam') },
+    { label: mode === 'hidden' ? 'Show assistant' : 'Hide assistant', click: () => setMode(mode === 'hidden' ? lastMode : 'hidden') },
     { type: 'separator' },
     { label: 'Quit', click: () => app.quit() },
   ]));
 }
 
-ipcMain.handle('roam:toggle', () => setRoaming(!roaming));
-ipcMain.handle('roam:is', () => roaming);
-ipcMain.on('roam:interactive', (_e, on) => {
-  if (!overlay) return;
+ipcMain.handle('roam:toggle', event => fromWindow(event, win) && setMode(mode === 'roam' ? 'dock' : 'roam'));
+ipcMain.handle('roam:is', event => !!fromWindow(event, win) && mode === 'roam');
+ipcMain.handle('assistant:open', event => { if (mode === 'dock' && fromWindow(event, overlay)) showApp(); });
+ipcMain.handle('assistant:hide', event => { if (mode === 'dock' && fromWindow(event, overlay)) setMode('hidden'); });
+ipcMain.on('roam:interactive', (event, on) => {
+  if (mode !== 'roam' || !fromWindow(event, overlay)) return;
   if (on) overlay.setIgnoreMouseEvents(false);
   else overlay.setIgnoreMouseEvents(true, { forward: true });
 });
 
-app.on('second-instance', () => { win?.show(); win?.focus(); });
+app.on('second-instance', showApp);
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  try {
+    await startBundledApp();
+  } catch (error) {
+    dialog.showErrorBox('Pebblebit could not start', error.code === 'EADDRINUSE'
+      ? 'Port 47826 is already in use. Close the other local server and reopen Pebblebit.'
+      : error.message);
+    app.quit();
+    return;
+  }
   // Desk mode needs the webcam, the Talk agent needs the mic: allow them for our own pages.
-  session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(['media', 'notifications', 'clipboard-sanitized-write'].includes(perm)));
-  session.defaultSession.setPermissionCheckHandler(() => true);
+  const allowed = ['media', 'notifications', 'clipboard-sanitized-write'];
+  session.defaultSession.setPermissionRequestHandler((wc, perm, cb, details) => {
+    cb(wc === win?.webContents && appOrigin(details.requestingUrl || wc.getURL()) && allowed.includes(perm));
+  });
+  session.defaultSession.setPermissionCheckHandler((wc, perm, origin) =>
+    wc === win?.webContents && appOrigin(origin) && allowed.includes(perm));
 
   createAppWindow();
-  createOverlay();
+  win.on('move', fitOverlay);
   screen.on('display-metrics-changed', fitOverlay);
   screen.on('display-added', fitOverlay);
   screen.on('display-removed', fitOverlay);
@@ -128,3 +207,4 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => app.quit());
+app.on('will-quit', () => localServer?.close());

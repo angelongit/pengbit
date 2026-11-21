@@ -127,6 +127,7 @@ export function init(ctx) {
   const sheet = new Image();
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let previousFrame = -1;
+  let lastTimerStatus = '';
   sheet.onload = () => renderClock();
   sheet.src = 'sprites/study-actions.png';
   const health = document.getElementById('study-health');
@@ -180,6 +181,11 @@ export function init(ctx) {
       ? (state.status === 'paused' ? 'Study paused' : STUDY_ACTIONS[action])
       : state.phase === 'break' ? 'Taking a break' : 'Pebblebit’s study desk';
     if (petAction.textContent !== caption) petAction.textContent = caption;
+    const timerStatus = state.phase + ':' + state.status + ':' + elClock.textContent;
+    if (lastTimerStatus !== timerStatus) {
+      lastTimerStatus = timerStatus;
+      ctx.bus?.emit('focus:state', { phase: state.phase, status: state.status, clock: elClock.textContent });
+    }
   }
 
   function renderStats() {
@@ -359,7 +365,9 @@ export function init(ctx) {
 
     if (outcome === 'completed') {
       ctx.chirp?.('happy');
-      ctx.say?.(encouragement(recap));
+      const line = encouragement(recap);
+      ctx.say?.(line);
+      ctx.bus?.emit('focus:encourage', line);
     }
     ctx.toast?.(
       outcome === 'completed'
@@ -430,6 +438,9 @@ export function init(ctx) {
     if (state.phase === 'focus' && confirm('End this focus session without earning credits?')) {
       finishFocus(getRemainingMs() <= 0 ? 'completed' : 'canceled');
     } else if (state.phase === 'break') finishBreak(false);
+  });
+  ctx.bus?.on('focus:toggle-pause', () => {
+    if (state.phase !== 'idle') btnPause.click();
   });
 
   // Resume active timer cleanly after a page reload.

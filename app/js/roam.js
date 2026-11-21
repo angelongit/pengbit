@@ -11,6 +11,8 @@ import { createRoamer, loadSprites } from './roamer.js';
 const CH = 'pengbit-roam';
 let ctx = null, chan = null, roamer = null, layer = null;
 let posture = null, dead = false;
+let dockWatchingUntil = 0;
+let focus = null;
 const desktop = typeof window !== 'undefined' ? window.pengbitDesktop : null;   // set by desktop/preload.cjs
 
 function snapshot() {
@@ -19,7 +21,7 @@ function snapshot() {
   return {
     t: Date.now(), name: p.name || 'Pebblebit', form: p.form, isEgg: !!p.isEgg, happy: p.happy, energy: p.energy,
     hungry: !!p.hungry, sad: !!p.sad, shivering: !!p.shivering, stillMin: Math.floor((p.stillStreak || 0) / 60),
-    mode: p.mode, act: a.act, posture, dead,
+    mode: p.mode, act: a.act, posture, dead, focus,
     graves: (ctx.names?.graveyard?.() || []).map((g) => g.name).filter(Boolean).slice(-6),
   };
 }
@@ -40,12 +42,26 @@ export async function init(c) {
       const m = e.data || {};
       if (m.type === 'poke') poke();
       else if (m.type === 'hello') send({ type: 'state', state: snapshot() });
+      else if (m.type === 'dock:watch') dockWatchingUntil = performance.now() + 4000;
+      else if (m.type === 'focus:toggle-pause' && desktop) ctx.bus?.emit('focus:toggle-pause');
     };
   }
   setInterval(() => send({ type: 'state', state: snapshot() }), 500);
+  if (desktop && chan) {
+    const scene = document.getElementById('scene');
+    const graphics = scene?.getContext('2d');
+    // Mirror just the game's pixel canvas, and only while the dock is listening.
+    if (graphics) setInterval(() => {
+      if (performance.now() >= dockWatchingUntil) return;
+      const pixels = graphics.getImageData(0, 0, scene.width, scene.height);
+      chan.postMessage({ type: 'dock:scene', pixels });
+    }, 100);
+  }
 
   const bus = ctx.bus;
   if (bus) {
+    bus.on('focus:state', (timer) => { focus = timer; });
+    bus.on('focus:encourage', (text) => send({ type: 'say', who: 'prof', text }));
     const lines = { 'pet:hungry': 'hungry...', 'pet:sad': ':(', 'pet:idle': 'brrr... walk with me?', 'pet:move': 'warm!' };
     for (const [type, text] of Object.entries(lines)) bus.on(type, () => send({ type: 'say', who: 'pet', text, ms: 3500 }));
     bus.on('exercise:done', (p) => send({ type: 'say', who: 'pet', text: p?.reps ? `${p.reps} reps!` : 'strong!', ms: 3000 }));
