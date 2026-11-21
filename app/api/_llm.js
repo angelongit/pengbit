@@ -14,15 +14,19 @@ function textOf(msg) {
 }
 
 async function askGemini(prompt) {
-  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: PROFESSOR }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 2048, temperature: 0.9 },
-    }),
+  const key = process.env.GEMINI_API_KEY.trim();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+  const body = JSON.stringify({
+    system_instruction: { parts: [{ text: PROFESSOR }] },
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { maxOutputTokens: 2048, temperature: 0.9 },
   });
+  // Works for both key formats ("AIza..." and the newer "AQ." auth keys): header first, then ?key= if rejected.
+  let r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body });
+  if (r.status === 400 || r.status === 401 || r.status === 403) {
+    console.error('[llm] gemini header auth', r.status, (await r.text()).slice(0, 200));
+    r = await fetch(url + '?key=' + encodeURIComponent(key), { method: 'POST', headers: { 'content-type': 'application/json' }, body });
+  }
   if (!r.ok) throw new Error('gemini ' + r.status + ' ' + (await r.text()).slice(0, 300));
   const data = await r.json();
   const parts = data?.candidates?.[0]?.content?.parts || [];
