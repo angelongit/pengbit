@@ -11,6 +11,7 @@ const FEATURES = [
   './pip.js',           // W6 Floating window (Daniel)
   './names.js',         // Hatch naming, retired names, tombstones of past Pengbits
   './mood.js',          // W6 Mood look: glum, scruffy, rounder as joy drops (Daniel)
+  './roam.js',          // Desktop roaming Pengbit (desktop/ companion + in-page fallback)
 ];
 
 export async function initFeatures(ctx) {
