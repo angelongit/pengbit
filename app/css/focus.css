@@ -1,0 +1,47 @@
+#tab-focus { --f-ink:#edf7ff; --f-muted:#afc5da; --f-mint:#8be6ca; --f-lcd:#101e31; }
+#tab-focus .focus-wrap { display:grid; gap:12px; color:#1d3047; }
+.focus-stage {
+  display:grid; grid-template-columns:minmax(0,1fr) 166px; gap:14px;
+  padding:16px; border:3px inset #8cabc8; border-radius:4px;
+  color:var(--f-ink); background:radial-gradient(ellipse at 82% 18%,#263c57,var(--f-lcd) 68%);
+}
+#tab-focus .focus-stage h2 { margin:0 0 8px; color:var(--f-ink); font-size:clamp(19px,3.4vw,29px); line-height:1.2; }
+.focus-clock { font:700 clamp(36px,9vw,65px)/1 Consolas, monospace; font-variant-numeric:tabular-nums; color:var(--f-mint); margin:2px 0 8px; letter-spacing:-.06em; }
+.focus-phase,.focus-note { color:var(--f-muted); margin:0; font-size:13px; }
+.focus-progress { width:100%; height:8px; accent-color:var(--f-mint); margin:9px 0 0; }
+.focus-pet { align-self:center; margin:0; min-width:0; text-align:center; }
+.focus-pet canvas { display:block; width:100%; max-width:160px; aspect-ratio:4/3; margin:auto; image-rendering:pixelated; background:repeating-linear-gradient(#162740 0 3px,#192e45 3px 4px); border:1px solid #536d88; }
+.focus-pet figcaption { margin-top:4px; color:var(--f-muted); font-size:12px; }
+.focus-card { padding:10px 12px; border:1px solid #a4b7cd; background:#f0f5fb; }
+#tab-focus .focus-card h3, #tab-health .focus-health h3 { margin:0 0 7px; font-size:17px; color:#213b5e; }
+.focus-actions,.focus-presets,.focus-custom,.recap-actions { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+#tab-focus .focus-actions { margin-top:12px; }
+#tab-focus button.focus-primary { background:#9de8cc; color:#142b30; border-color:#d6fff0 #49866e #49866e #d6fff0; font-weight:bold; }
+#tab-focus button[aria-pressed="true"] { background:#cae4f6; color:#183954; border-style:inset; }
+#tab-focus button[hidden], #tab-focus [hidden], #tab-health [hidden] { display:none !important; }
+.focus-custom { margin-top:8px; align-items:end; }
+.focus-custom label { display:grid; gap:3px; font-size:13px; }
+.focus-custom input { width:72px; padding:3px; }
+.focus-inline-note { margin:6px 0 0; font-size:12px; color:#455b71; }
+.focus-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:0; }
+.focus-metrics > div { padding:6px 8px; background:#e1ecf7; border:1px solid #becee1; }
+.focus-metrics dt { font-size:12px; color:#405975; }
+.focus-metrics dd { margin:2px 0 0; color:#163454; font:bold 20px/1.1 Consolas,monospace; }
+.focus-health { margin:0 0 10px; }
+.focus-health .btn-chrome { margin-top:7px; }
+.recap-grid { display:grid; grid-template-columns:max-content minmax(0,1fr); gap:4px 10px; margin:7px 0; font-size:13px; }
+.recap-grid dt { color:#405975; }
+.recap-grid dd { margin:0; }
+.recap-note { margin:8px 0; color:#244e48; }
+.recap-header { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px; }
+.recap-badge { font-size:12px; color:#765219; }
+@media (max-width:540px) {
+  .focus-stage { grid-template-columns:minmax(0,1fr) 105px; gap:7px; padding:9px; }
+  .focus-metrics > div { padding:5px; }
+  .focus-metrics dd { font-size:17px; }
+  #tab-focus .focus-actions { gap:5px; }
+}
+@media (max-width:340px) {
+  .focus-stage { grid-template-columns:minmax(0,1fr) 80px; }
+  .recap-grid { grid-template-columns:1fr; }
+}

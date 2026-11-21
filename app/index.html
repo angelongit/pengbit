@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="css/campus.css">
   <!-- Y2K retro skin: keep last so it can restyle every feature. -->
   <link rel="stylesheet" href="css/retro.css">
+  <link rel="stylesheet" href="css/focus.css">
 </head>
 <body>
   <!-- Start screen: a tap is needed for motion permission (iOS) and sound. -->
@@ -96,6 +97,7 @@
       <button data-tab="talk" class="hidden">Talk</button>
       <button data-tab="desk" class="hidden">Desk</button>
       <button data-tab="campus" class="hidden">Campus</button>
+      <button data-tab="focus" class="hidden">Focus</button>
     </nav>
 
     <!-- Professor -->
@@ -124,6 +126,15 @@
 
     <!-- Health -->
     <section id="tab-health" class="panel hidden">
+      <section class="focus-health focus-card" id="study-health" hidden>
+        <h3>Study progress</h3>
+        <dl class="focus-metrics">
+          <div><dt>Focus time</dt><dd data-focus-stat="minutes">0 min</dd></div>
+          <div><dt>Sessions</dt><dd data-focus-stat="sessions">0</dd></div>
+          <div><dt>Credits earned</dt><dd data-focus-stat="credits">0</dd></div>
+        </dl>
+        <button type="button" id="study-start-from-health" class="btn-chrome">Open focus timer</button>
+      </section>
       <p class="muted">Students sit for hours. Pebblebit shivers after 45 minutes still and warms up when you walk.</p>
       <div class="cards">
         <div class="card"><span class="label">Sitting streak</span><strong id="hStreak">0 min</strong></div>
@@ -210,6 +221,7 @@
     <section id="tab-talk" class="panel hidden"></section>
     <section id="tab-desk" class="panel hidden"></section>
     <section id="tab-campus" class="panel hidden"></section>
+    <section id="tab-focus" class="panel hidden"></section>
 
     <div id="toast" class="toast hidden"></div>
   </main>

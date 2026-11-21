@@ -226,7 +226,10 @@ export function init(ctx) {
         elLiveSrc.textContent = res.source;
         elConfBar.style.width = `${pct}%`;
 
-        emit('desk:posture', { label: res.label, conf: res.conf });
+        const lastFrame = detector.buffer.at(-1);
+        const observed = !!lastFrame && performance.now() - lastFrame.t < 500;
+        if (observed) ctx.pet.recordDeskSeconds?.(res.label, 1);
+        emit('desk:posture', { label: res.label, conf: res.conf, observed });
 
         if (recording && res.features) {
           dataset.push({
