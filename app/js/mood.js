@@ -6,6 +6,7 @@
 //
 // Lifespan: if nobody interacts with the app for a week, Pengbit passes away. The screen shows a
 // tombstone with its name and a little ghost Pengbit with a halo, plus a button to hatch a new egg.
+// When you come back, Professor Liveoak offers condolences (on screen and aloud) and a new egg.
 // Setup has a "Skip a week" test button so the team can demo it without waiting.
 //
 // Seam: init(ctx) sets ctx.paintPet(g, img, x, y, now, frame), which main.js and pip.js call in
@@ -158,6 +159,7 @@ function grave(g, img, x, y, now) {
 }
 
 let dead = null;   // { name, at, age } while Pengbit has passed away
+let audioReady = false;   // phones only play voice after the first tap
 
 export function paintPet(g, img, x, y, pet, now) {
   if (dead) { grave(g, img, x, y, now); return; }
@@ -204,6 +206,40 @@ function showMemorial(ctx) {
   box.append(t, b);
 }
 
+// Professor Liveoak's condolences when you come back to a Pengbit that has passed away.
+// Gentle on purpose: no guilt, just kindness and a fresh start.
+const CONDOLENCES = [
+  (n, a) => `Oh, my friend. I am so sorry. ${n} has passed on while you were away. ${n} lived ${a}, and every one of those minutes counted. When you are ready, I have a fresh egg warming in the lab. Shall we hatch it together?`,
+  (n, a) => `Come in, come in. I have sad news, I am afraid. ${n} slipped away peacefully, after ${a} of waddling through life with you. It happens to the best of keepers. A new egg is waiting whenever you feel up to it.`,
+  (n, a) => `My deepest condolences. ${n} was a remarkable little penguin, ${a} young. I have written a final page in the Pengbit Index for them. And look here, a new egg, wiggling already. Would you like to give it a home?`,
+];
+let condoled = false;          // once per visit
+function condole(ctx) {
+  if (!dead || condoled) return;
+  condoled = true;
+  const text = CONDOLENCES[Math.floor(Math.random() * CONDOLENCES.length)](dead.name, dead.age);
+  const el = document.getElementById('dexText');
+  if (el) el.textContent = text;
+  const src = document.getElementById('aiSource');
+  if (src) src.textContent = 'From Professor Liveoak.';
+  offerEgg(ctx);
+  ctx.openTab?.('dex');
+  ctx.say?.(text);
+}
+
+// A "Hatch a new egg" button under the professor's words, until a new egg exists.
+function offerEgg(ctx) {
+  const el = document.getElementById('dexText');
+  if (!el || document.getElementById('moodHatch')) return;
+  const b = document.createElement('button');
+  b.id = 'moodHatch'; b.type = 'button';
+  b.className = 'btn-chrome';
+  b.textContent = 'Hatch a new egg';
+  b.style.margin = '8px 0';
+  b.onclick = () => rebirth(ctx);
+  el.insertAdjacentElement('afterend', b);
+}
+
 function die(ctx) {
   if (dead) return;
   const pet = ctx.pet;
@@ -213,6 +249,7 @@ function die(ctx) {
   ctx.toast?.(`${dead.name} waited a whole week for you and passed away.`, 6000);
   ctx.bus?.emit('pet:died', { name: dead.name });
   ctx.render?.();
+  if (audioReady) condole(ctx);
 }
 
 function rebirth(ctx) {
@@ -222,6 +259,10 @@ function rebirth(ctx) {
   ctx.pet.reset();
   ctx.store.set('pet', ctx.pet);
   showMemorial(ctx);
+  document.getElementById('moodHatch')?.remove();
+  condoled = false;
+  const el = document.getElementById('dexText');
+  if (el) el.textContent = 'A brand new egg! Keep it close and keep moving, and it will hatch soon.';
   ctx.chirp?.('hello');
   ctx.render?.();
 }
@@ -257,10 +298,15 @@ export function init(ctx) {
   dead = ctx.store.get('dead', null);
   check(ctx);                      // a week away before this visit counts, so check before recording the visit
   showMemorial(ctx);
+  if (dead) offerEgg(ctx);
 
   // Any tap or key in the app is an interaction. Saved at most every 10 s.
   let lastSave = 0;
   const touch = () => {
+    if (!audioReady) {
+      audioReady = true;
+      if (dead) setTimeout(() => condole(ctx), 600);   // let Wake Pengbit finish unlocking audio first
+    }
     if (dead) return;
     const now = Date.now();
     if (now - lastSave > 10000) { lastSave = now; ctx.store.set('lastInteraction', now); }
