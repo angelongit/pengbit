@@ -75,7 +75,7 @@ function fmtAge(s) {
 // ---------------------------------------------------------------- professor
 async function askDex(auto = false) {
   const el = $('dexText');
-  el.classList.add('loading'); el.textContent = 'Professor Floe is writing...';
+  el.classList.add('loading'); el.textContent = 'Professor Liveoak is writing...';
   const { text, source } = await dexEntry(pet.summary());
   el.classList.remove('loading'); el.textContent = text;
   $('aiSource').textContent = source === 'ai' ? 'Written by the AI professor.' : 'Offline entry (AI proxy not set up yet).';
@@ -207,6 +207,7 @@ function draw(now) {
   // ground
   g.fillStyle = '#1f5566'; g.fillRect(0, 54, W, 1);
   g.fillStyle = '#16404d'; for (let x = (now / 60 * (act === 'walk' ? 1 : 0)) % 8; x < W; x += 8) g.fillRect(W - x, 57, 3, 1);
+  if (ctx.paintBackdrop) ctx.paintBackdrop(g, now, W, H);   // tombstones of past Pengbits (names.js)
 
   // snow when frost or shivering
   if (form === 'frost' || pet.shivering) {
@@ -233,7 +234,7 @@ function draw(now) {
   if (img) {
     g.save();
     if (act === 'walk' && walkDir < 0 && !pet.isEgg) { g.translate(x * 2 + 32, 0); g.scale(-1, 1); }
-    g.drawImage(img, x, y, 32, 32);
+    if (ctx.paintPet) ctx.paintPet(g, img, x, y, now, frame); else g.drawImage(img, x, y, 32, 32);   // W6 mood look
     g.restore();
   }
 
@@ -258,7 +259,7 @@ function draw(now) {
   requestAnimationFrame(draw);
 }
 
-// Professor Floe portrait: Daniel's sprites/professor.png if it exists, else the inline 16x16 face.
+// Professor Liveoak portrait: Daniel's sprites/professor.png if it exists, else the inline 16x16 face.
 function loadProfessor() {
   const im = new Image();
   im.onload = () => {

@@ -2,7 +2,7 @@
 
 ## 150-word submission summary
 
-Pengbit turns the hours students spend sitting into a playful reason to move daily. It is a pocket-penguin companion that changes as its owner moves: walking nurtures Sprinter, focused upright desk time nurtures Frost, and repeated shaking or slouching shapes Glitch. On a phone, an on-device activity model classifies motion from accelerometer windows, with threshold rules as a fallback. In Desk mode, a laptop webcam estimates posture locally; video stays on the device. A sitting streak makes Pengbit shiver and issue a nudge. We measure impact as nudges followed by a walk, rather than treating screen time or steps alone as success. Professor Floe uses an LLM for personalized field notes and coaching, with optional ElevenLabs speech and live conversation. The project combines embedded-inspired pet mechanics, browser-based machine learning, computer vision, and privacy-conscious interaction to make healthier study breaks engaging. Final measured model accuracy: [FILL IN]. Nudges answered: [FILL IN].
+Pengbit turns the hours students spend sitting into a playful reason to move daily. It is a pocket-penguin companion that changes as its owner moves: walking nurtures Sprinter, focused upright desk time nurtures Frost, and repeated shaking or slouching shapes Glitch. On a phone, an on-device activity model classifies motion from accelerometer windows, with threshold rules as a fallback. In Desk mode, a laptop webcam estimates posture locally; video stays on the device. A sitting streak makes Pengbit shiver and issue a nudge. We measure impact as nudges followed by a walk, rather than treating screen time or steps alone as success. Professor Liveoak uses an LLM for personalized field notes and coaching, with optional ElevenLabs speech and live conversation. The project combines embedded-inspired pet mechanics, browser-based machine learning, computer vision, and privacy-conscious interaction to make healthier study breaks engaging. Final measured model accuracy: [FILL IN]. Nudges answered: [FILL IN].
 
 ## Three-minute demo script
 
@@ -21,8 +21,8 @@ Pengbit turns the hours students spend sitting into a playful reason to move dai
 ### 1:55–2:20 — The nudge and impact metric
 "After a long sitting streak, Pengbit shivers and nudges its owner to take a short break. We track how many nudges are followed by movement. Final measured values: [ACCURACY] model accuracy and [NUDGES ANSWERED] nudges answered."
 
-### 2:20–2:45 — Professor Floe
-"Professor Floe is the penguin researcher. It reads the pet's real stats and gives short, encouraging suggestions. Optional live voice chat lets the owner ask questions hands-free."
+### 2:20–2:45 — Professor Liveoak
+"Professor Liveoak is the penguin researcher. It reads the pet's real stats and gives short, encouraging suggestions. Optional live voice chat lets the owner ask questions hands-free."
 
 ### 2:45–3:00 — Close
 "Pengbit combines an engaging pet, on-device machine learning, local computer vision, and conversational AI to make study breaks easier to notice and act on."
@@ -30,7 +30,7 @@ Pengbit turns the hours students spend sitting into a playful reason to move dai
 ## Team
 
 - Angel: application integration, firmware, and machine learning.
-- Daniel: pixel art, Professor Floe's prompts and voice, and the floating companion window.
+- Daniel: pixel art, Professor Liveoak's prompts and voice, and the floating companion window.
 
 ## Technology
 
@@ -38,7 +38,7 @@ Pengbit turns the hours students spend sitting into a playful reason to move dai
 - On-device motion classification and browser-trained MLP.
 - MediaPipe Pose Landmarker for local webcam posture estimation.
 - Vercel serverless functions for private AI API calls.
-- Claude for Professor Floe's written coaching; ElevenLabs for speech and conversational voice.
+- Claude for Professor Liveoak's written coaching; ElevenLabs for speech and conversational voice.
 
 ## Privacy notes
 

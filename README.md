@@ -27,7 +27,7 @@ Laptop webcam ──> local pose landmarks ──> posture classifier ───�
                                       sitting streak ──> gentle nudge |
                                       walk / upright / slouch ──> pet form
                                                                       |
-                                      pet summary ──> Professor Floe
+                                      pet summary ──> Professor Liveoak
                                                        ├─> Claude text
                                                        └─> ElevenLabs voice
 ```
@@ -46,22 +46,22 @@ Pengbit's key impact metric is **nudges answered**: a sitting nudge followed by 
 - Desk mode uses MediaPipe Pose Landmarker to estimate upright, slouch, or away from normalized body landmarks. Video frames are processed locally and are not uploaded.
 - Final measured model accuracy: **[FILL IN]**. Nudges answered: **[FILL IN]**. Replace these placeholders with measured demo results.
 
-## Professor Floe and AI
+## Professor Liveoak and AI
 
-Professor Floe is a warm, slightly dramatic penguin researcher. Claude generates the Pengbit Index entries and short coaching messages from the pet's summary. ElevenLabs provides speech and optional live conversational voice. The serverless API routes keep provider API keys on the server.
+Professor Liveoak is a warm, slightly dramatic penguin researcher. Claude generates the Pengbit Index entries and short coaching messages from the pet's summary. ElevenLabs provides speech and optional live conversational voice. The serverless API routes keep provider API keys on the server.
 
 ## Privacy
 
 - Phone motion data is processed in the browser on the phone.
 - Desk-mode camera frames are processed locally; video never leaves the laptop.
-- Pet stats are sent to the AI service when a user requests Professor Floe content.
+- Pet stats are sent to the AI service when a user requests Professor Liveoak content.
 - Live voice chat sends microphone audio to ElevenLabs while the conversation is active.
 - No API keys belong in client code or Git.
 
 ## Team
 
 - **Angel**: application integration, firmware, and machine learning.
-- **Daniel**: pixel art, Professor Floe prompts and voice, and the floating companion window.
+- **Daniel**: pixel art, Professor Liveoak prompts and voice, and the floating companion window.
 
 ## Tech stack
 
@@ -72,7 +72,7 @@ HTML, CSS, JavaScript ES modules, Progressive Web App APIs, browser sensors, Med
 - app/: deployed web application.
 - app/js/: pet, motion, pose, and feature modules.
 - app/api/: serverless AI endpoints.
-- app/sprites/: pixel-art forms and Professor Floe portrait.
+- app/sprites/: pixel-art forms and Professor Liveoak portrait.
 - firmware/: original handheld firmware and hardware tests.
 - shell/: enclosure CAD and print files.
 - docs/: wiring, project notes, and pitch materials.
@@ -85,7 +85,7 @@ Server environment variables (never commit values):
 
 | Variable | Purpose |
 |---|---|
-| ANTHROPIC_API_KEY | Professor Floe text generation |
+| ANTHROPIC_API_KEY | Professor Liveoak text generation |
 | PENGBIT_MODEL | Optional Claude model override |
 | ELEVENLABS_API_KEY | ElevenLabs TTS and signed voice-session requests |
 | ELEVENLABS_VOICE_ID | Optional TTS voice selection |

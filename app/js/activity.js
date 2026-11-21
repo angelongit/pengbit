@@ -107,7 +107,8 @@ export class MLP {
   }
 
   // data: [{f, label}] -> trains in place. Returns {trainAcc, valAcc, confusion, nTrain, nVal}.
-  train(data, { epochs = 400, lr = 0.02, l2 = 1e-3, valFrac = 0.2, onEpoch } = {}) {
+  // warm: keep the current weights and mu/sd and fine-tune them (Pengbit Flock local update).
+  train(data, { epochs = 400, lr = 0.02, l2 = 1e-3, valFrac = 0.2, onEpoch, warm = false } = {}) {
     // Stratified shuffle split.
     const train = [], val = [];
     for (const a of ACTS) {
@@ -116,9 +117,11 @@ export class MLP {
       val.push(...rows.slice(0, nv)); train.push(...rows.slice(nv));
     }
     const F = this.nIn;
-    this.mu = Array.from({ length: F }, (_, i) => mean(train.map((d) => d.f[i])));
-    this.sd = Array.from({ length: F }, (_, i) => std(train.map((d) => d.f[i]), this.mu[i]) || 1);
-    this.init();
+    if (!warm || !this.mu) {
+      this.mu = Array.from({ length: F }, (_, i) => mean(train.map((d) => d.f[i])));
+      this.sd = Array.from({ length: F }, (_, i) => std(train.map((d) => d.f[i]), this.mu[i]) || 1);
+    }
+    if (!warm || !this.W1) this.init();
 
     const X = train.map((d) => this.norm(d.f));
     const Y = train.map((d) => ACTS.indexOf(d.label));

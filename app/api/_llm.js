@@ -1,16 +1,37 @@
-// Shared Claude call for the professor endpoints. Key stays on the server (ANTHROPIC_API_KEY).
+// Shared LLM call for the professor endpoints. Keys stay on the server.
+// Uses Claude when ANTHROPIC_API_KEY is set, otherwise Gemini when GEMINI_API_KEY is set
+// (free key from aistudio.google.com). With neither, the routes return 503 and the app uses offline text.
 import Anthropic from '@anthropic-ai/sdk';
 import { PROFESSOR } from './_prompts.js';
 
 const MODEL = process.env.PENGBIT_MODEL || 'claude-opus-5-5';
-const client = new Anthropic();
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+let client = null;   // created lazily so a missing Anthropic key never crashes the route
 
 function textOf(msg) {
   if (msg.stop_reason === 'refusal') return '';
   return msg.content.filter((b) => b.type === 'text').map((b) => b.text).join(' ').trim();
 }
 
+async function askGemini(prompt) {
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: PROFESSOR }] },
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: 2048, temperature: 0.9 },
+    }),
+  });
+  if (!r.ok) throw new Error('gemini ' + r.status + ' ' + (await r.text()).slice(0, 300));
+  const data = await r.json();
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  return parts.filter((p) => typeof p.text === 'string' && !p.thought).map((p) => p.text).join(' ').trim();
+}
+
 export async function ask(prompt) {
+  if (!process.env.ANTHROPIC_API_KEY) return askGemini(prompt);
+  client ||= new Anthropic();
   const base = {
     model: MODEL,
     max_tokens: 1024,
@@ -43,7 +64,7 @@ export function cleanPet(p = {}) {
 
 export async function handle(req, res, build) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'ANTHROPIC_API_KEY not set' });
+  if (!process.env.ANTHROPIC_API_KEY && !process.env.GEMINI_API_KEY) return res.status(503).json({ error: 'no LLM key set (ANTHROPIC_API_KEY or GEMINI_API_KEY)' });
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const text = await ask(build(body));

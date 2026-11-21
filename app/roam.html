@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pengbit Roam</title>
+<!-- Desktop overlay page. The desktop companion (desktop/) loads this in a transparent, always-on-top,
+     click-through window that covers the screen. Pengbit's state comes from the main Pengbit page
+     (js/roam.js) over BroadcastChannel 'pengbit-roam'. Opened in a normal tab, it is a test stage. -->
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+  body.preview { background: repeating-linear-gradient(45deg, #dfe8f0 0 20px, #eef3f7 20px 40px); }
+  #stage { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  #hint { position: fixed; left: 12px; top: 12px; font: 12px "Lucida Console", monospace; color: #0d2a36; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script type="module">
+  import { createRoamer, loadSprites } from './js/roamer.js';
+
+  const desk = window.pengbitDesktop;          // set by desktop/preload.cjs
+  if (!desk) {
+    document.body.classList.add('preview');
+    const h = document.createElement('div');
+    h.id = 'hint';
+    h.textContent = 'Roam preview. Open Pengbit in another tab of this browser to sync.';
+    document.body.appendChild(h);
+  }
+  await loadSprites();
+  const stage = document.getElementById('stage');
+  const chan = 'BroadcastChannel' in window ? new BroadcastChannel('pengbit-roam') : null;
+  const roamer = createRoamer(stage, {
+    onHover: (on) => desk?.setInteractive?.(on),
+    onPoke: () => chan?.postMessage({ type: 'poke' }),
+  });
+
+  let lastState = 0;
+  if (chan) {
+    chan.onmessage = (e) => {
+      const m = e.data || {};
+      if (m.type === 'state') { lastState = Date.now(); roamer.setState(m.state); }
+      else if (m.type === 'say') roamer.say(m.text, m);
+    };
+    chan.postMessage({ type: 'hello' });
+  }
+  setTimeout(() => {
+    if (!lastState) roamer.say('Open the Pengbit app so I know how I\'m feeling!', { ms: 6000 });
+  }, 4000);
+
+  if (desk?.onCursor) desk.onCursor((x, y) => roamer.setCursor(x, y));
+  else window.addEventListener('mousemove', (e) => roamer.setCursor(e.clientX, e.clientY));
+</script>
+</body>
+</html>

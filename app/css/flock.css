@@ -1,1 +1,24 @@
-/* W1: styles for tab-flock. Owned by that workstream; scope rules under #tab-flock. */
+/* W1 Pengbit Flock: the Flock tab. */
+#tab-flock .fk-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+#tab-flock h2 { font-family: var(--pix); font-size: 13px; margin: 0; color: var(--band); }
+#tab-flock .fk-privacy { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: stretch; margin: 10px 0 4px; }
+#tab-flock .fk-side { border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+#tab-flock .fk-side strong { font-family: var(--term); font-size: 24px; line-height: 1.1; }
+#tab-flock .fk-side small { color: var(--muted); font-size: 12px; }
+#tab-flock .fk-side.stay { background: rgba(124, 255, 155, 0.1); border: 1px solid rgba(124, 255, 155, 0.45); }
+#tab-flock .fk-side.send { background: rgba(255, 107, 241, 0.1); border: 1px solid rgba(255, 107, 241, 0.45); }
+#tab-flock .fk-arrow { align-self: center; font-size: 20px; color: var(--muted); }
+#tab-flock .fk-zero { margin: 6px 0 0; font-size: 13px; color: var(--walk); }
+#tab-flock .fk-cards .card strong { font-size: 26px; }
+#tab-flock .fk-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+#tab-flock .fk-peng { display: flex; flex-direction: column; align-items: center; width: 58px; padding: 4px 2px; border-radius: 10px; background: rgba(0, 0, 0, 0.25); border: 1px solid transparent; }
+#tab-flock .fk-peng canvas { width: 32px; height: 32px; image-rendering: pixelated; }
+#tab-flock .fk-peng span { font-size: 11px; max-width: 54px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#tab-flock .fk-peng.me { border-color: var(--band); }
+#tab-flock .fk-peng.idle { opacity: 0.45; }
+#tab-flock .fk-peng.pending { box-shadow: 0 0 0 2px var(--shake); }
+#tab-flock .fk-teach { background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 10px; margin: 6px 0; }
+#tab-flock .fk-teach strong { display: block; font-family: var(--term); font-size: 24px; margin-bottom: 6px; }
+#tab-flock .fk-payload { max-height: 220px; overflow: auto; font-size: 13px; }
+#tab-flock .fk-how { padding-left: 18px; }
+#tab-flock a { color: var(--lcd-ink); }

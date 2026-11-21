@@ -14,10 +14,13 @@ tap **Wake Pengbit**, and the phone's motion sensor feeds the pet. Add it to the
   (deviation from 1 g, jerk, per-axis spread, step periodicity, ...) -> a small neural network (12 -> 16 -> 3)
   trained in the browser on your own recordings (Train AI tab), with held-out validation accuracy and a confusion
   matrix. Threshold rules are the fallback when there's no model.
-- **Professor Floe** (`js/ai.js`, `api/`): dex entries and coaching from Claude, voice from ElevenLabs, both
+- **Professor Liveoak** (`js/ai.js`, `api/`): dex entries and coaching from Claude, voice from ElevenLabs, both
   through serverless functions so no keys ship to the phone. Without keys it falls back to offline text and the
   browser's speech voice, so the demo never breaks.
 - **No phone?** Setup -> Simulate, or keys W / S / K (walk / still / shake), D (demo), E (evolve).
+
+- **Roaming Pengbit**: the ROAM button lets it walk around over the page; the desktop companion in `../desktop/`
+  (Electron, `npm start`) lets it walk over your whole desktop like Clippy. See `desktop/README.md`.
 
 ## Deploy (Vercel, about 2 minutes)
 
@@ -54,3 +57,23 @@ New features plug in without editing `main.js`:
    null goes back to the phone's motion), `getActivity()`.
    Desk mode: `pet.mode` is 'phone' or 'desk'; `MODE_LABELS` in pet.js gives display names; `new MLP(null, { nIn })`.
 5. Add new files to `SHELL` in `sw.js` and bump `CACHE`.
+
+## Pengbit Flock (federated learning)
+
+Phones train the walk/still/shake model on their own recordings and share only **what they learned**:
+259 model weights, a sample count and per-feature sums (for shared normalization). Raw motion windows never leave the phone.
+`api/flock` averages the updates (FedAvg, weighted by sample count, stale updates down-weighted) into a shared model.
+
+- **Phone**: Flock tab (`js/flock.js`). Join, then **Teach the flock (30 s)** records 10 s still, shake and walk, trains locally
+  from the shared model and uploads the weights. 1 in 5 windows is held out: the phone scores each round's shared model on
+  them and reports only the score. "See exactly what gets sent" shows the last payload. `/?flock=1` opens the tab and joins.
+- **Big screen**: `/flock.html` (QR code to join, the flock around the shared model, accuracy by round, round log).
+  `/flock.html?sim` (or the toggle) adds 4 simulated penguins that train on synthetic motion in that browser, each mostly
+  doing one activity (non-IID), labeled "sim".
+- **Rounds** close when `FLOCK_MIN_UPDATES` updates are in (default 2) or `FLOCK_ROUND_SECONDS` after the first (default 20),
+  or with "Close round now".
+- **Storage**: Upstash Redis through Vercel (Storage → Upstash for Redis → connect to this project; it sets
+  `KV_REST_API_URL` / `KV_REST_API_TOKEN`). Without it, the flock lives in one function instance's memory (fine for a demo,
+  but it can reset on a cold start). Set `FLOCK_RESET_KEY` to allow `POST /api/flock {op:'reset', key}`.
+- Math: `js/fedavg.js` (shared by phone and server). Each update's first layer is rewritten exactly for the pooled mu/sd
+  before averaging, so phones that normalized differently still average correctly.

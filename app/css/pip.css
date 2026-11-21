@@ -1,0 +1,79 @@
+/* Pengbit floating window (Daniel, W6). Loaded only inside the Picture-in-Picture document,
+   so these page-wide rules never touch the main app. The FLOAT launcher styles itself (js/pip.js). */
+:root {
+  --tidal: #1f5fbf; --tidal-dark: #0d3270; --face: #c9d3e0; --screen: #0d2a36;
+  --ink: #101418; --tip: #ffffe1; --hi: #ffffff; --lo: #6b7684;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--face); overflow: hidden; }
+body { font: 11px/1.3 "Lucida Console", "Courier New", monospace; color: var(--ink); }
+
+.pip-window {
+  height: 100%; display: flex; flex-direction: column; gap: 5px; padding: 0 5px 5px;
+  border: 2px solid; border-color: var(--hi) var(--lo) var(--lo) var(--hi);
+}
+.pip-titlebar {
+  margin: 0 -5px; display: flex; align-items: center; gap: 5px; padding: 3px 4px;
+  background: linear-gradient(90deg, var(--tidal-dark), var(--tidal) 60%, #5d93ef);
+  color: #fff; font-weight: bold; letter-spacing: 1px; user-select: none;
+}
+.pip-icon { width: 10px; height: 10px; background: #e8f4ff; border-radius: 50% 50% 45% 45%; box-shadow: inset 0 -4px 0 #2b3a55; }
+.pip-title { flex: 1; }
+.pip-btns { display: flex; gap: 2px; }
+.pip-btns b {
+  width: 14px; height: 13px; display: grid; place-items: center; font-size: 9px; color: var(--ink);
+  background: var(--face); border: 1px solid; border-color: var(--hi) var(--lo) var(--lo) var(--hi);
+}
+.pip-x { cursor: pointer; }
+
+.pip-screen {
+  position: relative; flex: 1; min-height: 120px; border-radius: 6px; overflow: hidden;
+  background: var(--screen); border: 3px solid; border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+}
+.pip-screen::after {          /* scanlines */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(transparent 0 2px, #0003 2px 3px);
+}
+.pip-scene { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
+.pip-chip {
+  position: absolute; left: 6px; bottom: 5px; padding: 1px 6px; font-size: 10px; font-weight: bold;
+  color: #0d2a36; background: #9ff3ff; border: 1px solid #0d2a36;
+}
+.pip-chip.walk { background: #ffd84a; }
+.pip-chip.shake { background: #ff9fb0; }
+.pip-petbubble {
+  position: absolute; top: 8px; right: 8px; padding: 2px 7px; font-weight: bold;
+  background: #fff; color: #000; border: 2px solid #000; border-radius: 8px;
+}
+.pip-petbubble::after {
+  content: ""; position: absolute; left: 8px; bottom: -7px; border: 5px solid transparent; border-top-color: #000;
+}
+
+.pip-stats { display: grid; grid-template-columns: 48px 1fr; gap: 3px 6px; align-items: center; font-size: 10px; }
+.pip-bar { height: 9px; background: #fff; border: 1px solid; border-color: var(--lo) var(--hi) var(--hi) var(--lo); }
+.pip-bar i { display: block; height: 100%; width: 0; background: var(--tidal); transition: width .4s; }
+.pip-bar i.low { background: #d0402a; }
+.pip-status { display: flex; justify-content: space-between; font-size: 10px; color: #3a4654; }
+.pip-name { font-weight: bold; }
+
+/* Professor Liveoak, Clippy style: portrait plus a yellow tooltip bubble */
+.pip-prof { display: grid; grid-template-columns: 40px 1fr; gap: 6px; align-items: end; }
+.pip-face {
+  width: 40px; height: 40px; image-rendering: pixelated; background: var(--screen);
+  border: 2px solid; border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+}
+.pip-say {
+  position: relative; padding: 6px 7px; background: var(--tip); border: 1px solid #000; border-radius: 6px;
+  box-shadow: 2px 2px 0 #0004; max-height: 110px; overflow: auto;
+}
+.pip-say::before {
+  content: ""; position: absolute; left: -8px; bottom: 8px; border: 4px solid transparent; border-right: 4px solid #000;
+  border-width: 4px 8px 4px 0;
+}
+.pip-say p { margin: 0 0 4px; }
+.pip-say button {
+  float: right; font: inherit; font-size: 10px; padding: 1px 10px; cursor: pointer;
+  background: var(--face); border: 1px solid; border-color: var(--hi) var(--lo) var(--lo) var(--hi);
+}
+.pip-say button:active { border-color: var(--lo) var(--hi) var(--hi) var(--lo); }
+.hidden { display: none !important; }
