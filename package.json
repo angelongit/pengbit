@@ -5,5 +5,8 @@
   "description": "Deploys app/ on Vercel from the repo root. See app/README.md.",
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0"
+  },
+  "scripts": {
+    "local": "node dev-server.mjs"
   }
 }
