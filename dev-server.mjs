@@ -11,10 +11,13 @@ const APP = path.join(ROOT, 'app');
 const PORT = Number(process.env.PORT || 3000);
 
 // ---- .env.local / .env (simple KEY=value lines; existing env wins)
-for (const name of ['.env.local', '.env']) {
+// Also accepts .env.local.txt, which Windows Notepad creates when "Save as type" is left on Text Documents.
+const envFiles = [];
+for (const name of ['.env.local', '.env.local.txt', '.env', '.env.txt']) {
   const file = path.join(ROOT, name);
   if (!fs.existsSync(file)) continue;
-  for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+  envFiles.push(name);
+  for (const line of fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '').split(/\r?\n/)) {
     const m = line.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
     if (!m || process.env[m[1]] !== undefined) continue;
     process.env[m[1]] = m[2].replace(/^(['"])(.*)\1$/, '$2');
@@ -85,6 +88,7 @@ http.createServer((req, res) => {
   serveStatic(req, res, url);
 }).listen(PORT, () => {
   console.log(`\nPengbit running at http://localhost:${PORT}\n`);
+  console.log(`  key file: ${envFiles.length ? envFiles.join(', ') : 'NONE FOUND in ' + ROOT}`);
   const has = (k) => (process.env[k] ? 'set' : 'MISSING');
   console.log(`  ELEVENLABS_API_KEY  ${has('ELEVENLABS_API_KEY')}`);
   console.log(`  ELEVENLABS_AGENT_ID ${has('ELEVENLABS_AGENT_ID')}`);
