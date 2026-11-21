@@ -23,7 +23,8 @@ export function init(ctx) {
   const section = document.getElementById('tab-desk');
   const navBtn = document.querySelector('[data-tab="desk"]');
   if (!section) return;
-  if (navBtn) navBtn.hidden = false;
+ if (ctx.showTab) ctx.showTab('desk');
+  else if (navBtn) navBtn.hidden = false;
 
   const labels = (MODE_LABELS && MODE_LABELS.desk) || SLOT_TO_DESK;
 
