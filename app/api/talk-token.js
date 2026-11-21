@@ -12,8 +12,9 @@ export default async function handler(req, res) {
       { method: 'GET', headers: { 'xi-api-key': apiKey, accept: 'application/json' } }
     );
     if (!upstream.ok) {
-      console.error('[talk-token] ElevenLabs returned', upstream.status);
-      return res.status(502).json({ error: 'Could not create a voice session' });
+      const detail = (await upstream.text().catch(() => '')).slice(0, 300);
+      console.error('[talk-token] ElevenLabs returned', upstream.status, detail);
+      return res.status(502).json({ error: 'Could not create a voice session', upstream: upstream.status, detail });
     }
     const body = await upstream.json();
     if (typeof body.signed_url !== 'string' || !body.signed_url.startsWith('wss://')) {
