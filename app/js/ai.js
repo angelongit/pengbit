@@ -27,7 +27,10 @@ function offlineDex(s) {
 }
 
 function offlineCoach(s, situation) {
-  if (situation === 'nudge') return `You've been sitting for about ${s.stillStreakMinutes} minutes, and ${s.name} is shivering. A two minute walk warms you both up. Go on, I'll time it.`;
+  if (situation === 'nudge') {
+    const next = s.mode === 'desk' ? 'Stand up and step away for a short break.' : 'Take a short walk to warm up.';
+    return `${s.name} is shivering after ${s.stillStreakMinutes} pet minutes without a break. ${next}`;
+  }
   if (situation === 'moved') return `Nice! You got up after the nudge. That's ${s.nudgesAnswered} of ${s.nudges} nudges answered. ${s.name} is warming up.`;
   return s.minutes.walk > s.minutes.still
     ? `Great pace today: ${s.minutes.walk} minutes walking. Keep it up and ${s.name} may become a Sprinter.`

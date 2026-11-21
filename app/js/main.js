@@ -125,13 +125,21 @@ function handleEvents() {
         toast(`${pet.name} evolved into ${FORMS[e.value].name}!`, 4000); askDex(true); break;
       case 'hungry': chirp('hungry'); bubble('hungry...'); toast(`${pet.name} is hungry. Press A to feed.`); break;
       case 'sad': chirp('sad'); bubble(':('); toast(`${pet.name} is sad. Go for a walk or press B to play.`); break;
-      case 'idle':
+      case 'idle': {
+        const desk = pet.mode === 'desk';
+        const position = desk ? 'seated' : 'still';
+        const next = desk ? 'Stand up and step away for a short break.' : 'Time for a short walk!';
         chirp('nudge'); vibrate([200, 100, 200, 100, 200]); bubble('brrr...', 4000);
-        toast(`${pet.name} is shivering after ${e.value} minutes still. Time for a walk!`, 4500);
+        toast(`${pet.name} is shivering after ${e.value} pet minutes ${position}. ${next}`, 4500);
         askCoach('nudge', true); break;
-      case 'move':
-        chirp('move'); bubble('warm!'); toast(e.value === 'exercise' ? 'Nudge answered with exercise!' : 'Nudge answered. Nice walk!');
+      }
+      case 'move': {
+        const message = e.value === 'exercise' ? 'Nudge answered with exercise!'
+          : pet.mode === 'desk' ? 'Nudge answered. Thanks for taking a desk break!'
+          : 'Nudge answered. Nice walk!';
+        chirp('move'); bubble('warm!'); toast(message);
         askCoach('moved', true); break;
+      }
     }
   }
 }
