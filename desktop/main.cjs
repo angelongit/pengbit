@@ -5,13 +5,17 @@
 //   overlay  either a compact, always-on-top corner assistant or the click-through roaming layer.
 // Both load the same origin, so the app streams the pet's state to the overlay over BroadcastChannel.
 //
-// Run:  npm install  then  npm start                     (uses http://localhost:3000, start `npm run local` in the repo root first)
+// Run:  npm install  then  npm start                     (starts the bundled local server)
 //       npm start -- --url=https://pengbit.vercel.app    (or set PENGBIT_URL)
-const { app, BrowserWindow, ipcMain, screen, session, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, session, Tray, Menu, nativeImage, dialog } = require('electron');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 
 const argUrl = process.argv.find((a) => a.startsWith('--url='));
-const APP_URL = (argUrl ? argUrl.slice(6) : process.env.PENGBIT_URL || 'http://localhost:3000').replace(/\/+$/, '');
+const externalUrl = argUrl ? argUrl.slice(6) : process.env.PENGBIT_URL;
+const localHost = '127.0.0.1';
+const localPort = 47826;
+const APP_URL = (externalUrl || `http://${localHost}:${localPort}`).replace(/\/+$/, '');
 const APP_ORIGIN = new URL(APP_URL).origin;
 const DOCK = { width: 292, height: 218, inset: 12 };
 
@@ -23,6 +27,17 @@ if (!app.requestSingleInstanceLock()) app.quit();
 
 let win = null, overlay = null, tray = null, cursorTimer = null, mode = 'dock';
 let lastMode = 'dock';
+let localServer;
+
+async function startBundledApp() {
+  if (externalUrl) return;
+  const root = path.join(__dirname, '..');
+  const envDirs = app.isPackaged
+    ? [process.env.PORTABLE_EXECUTABLE_DIR || path.dirname(process.execPath), app.getPath('userData')]
+    : [root];
+  const { startLocalServer } = await import(pathToFileURL(path.join(root, 'dev-server.mjs')).href);
+  localServer = await startLocalServer({ root, host: localHost, port: localPort, envDirs });
+}
 
 function appOrigin(url) {
   try { return new URL(url).origin === APP_ORIGIN; }
@@ -159,7 +174,16 @@ ipcMain.on('roam:interactive', (event, on) => {
 
 app.on('second-instance', showApp);
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  try {
+    await startBundledApp();
+  } catch (error) {
+    dialog.showErrorBox('Pebblebit could not start', error.code === 'EADDRINUSE'
+      ? 'Port 47826 is already in use. Close the other local server and reopen Pebblebit.'
+      : error.message);
+    app.quit();
+    return;
+  }
   // Desk mode needs the webcam, the Talk agent needs the mic: allow them for our own pages.
   const allowed = ['media', 'notifications', 'clipboard-sanitized-write'];
   session.defaultSession.setPermissionRequestHandler((wc, perm, cb, details) => {
@@ -183,3 +207,4 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => app.quit());
+app.on('will-quit', () => localServer?.close());

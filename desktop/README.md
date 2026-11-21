@@ -17,14 +17,18 @@ window: along the bottom of the screen (on the taskbar/dock edge), hopping, dash
 
 ## Run it
 
-You need Node 18+ (same as the local server).
+Double-click the Windows portable executable to open Pebblebit. It starts its own loopback
+server and brings up the main window and dock. To enable live voice and generated entries,
+place your own `.env.local` beside the executable. The executable contains no API keys.
+The portable app uses its own local app address and profile. Saved pets and models from another
+browser or from the development server remain in their original profile.
+
+For development, you need Node 18+.
 
 ```bash
-# terminal 1, repo root: the Pebblebit app + API on http://localhost:3000
+# repo root: install the API dependencies
 npm install
-npm run local
 
-# terminal 2
 cd desktop
 npm install      # first time only, downloads Electron (~100 MB)
 npm start
@@ -35,8 +39,16 @@ bottom-right assistant. Minimize the app window if you like; the pet keeps runni
 
 - **ROAM / CATCH** switches between the docked assistant and roaming. The tray also offers **Hide assistant**.
 - Use the deployed site instead of the local server: `npm run vercel`, or `npm start -- --url=https://pengbit.vercel.app`
-  (or set `PENGBIT_URL`). The event Wi-Fi breaks TLS to vercel.app, so the local server is the default.
+  (or set `PENGBIT_URL`). To use a manually started local server, pass its URL the same way.
 - Closing the app window quits everything.
+
+To build the portable executable on Windows, run this from the repo root after installing dependencies:
+
+```powershell
+npm exec --yes --package=electron-builder@26.18.0 -- electron-builder --win portable --x64 --config desktop/electron-builder.yml
+```
+
+The build goes in `dist-desktop/`.
 
 ## No desktop app? (fallback)
 
