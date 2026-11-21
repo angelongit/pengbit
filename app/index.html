@@ -15,6 +15,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- One stylesheet per feature (work split W1-W5). Each file is owned by its workstream. -->
+  <link rel="stylesheet" href="css/flock.css">
+  <link rel="stylesheet" href="css/move.css">
+  <link rel="stylesheet" href="css/insights.css">
+  <link rel="stylesheet" href="css/talk.css">
+  <link rel="stylesheet" href="css/campus.css">
 </head>
 <body>
   <!-- Start screen: a tap is needed for motion permission (iOS) and sound. -->
@@ -78,6 +84,12 @@
       <button data-tab="health">Health</button>
       <button data-tab="train">Train AI</button>
       <button data-tab="setup">Setup</button>
+      <!-- Feature tabs: hidden until the feature's init(ctx) calls ctx.showTab(name). -->
+      <button data-tab="flock" class="hidden">Flock</button>
+      <button data-tab="move" class="hidden">Move</button>
+      <button data-tab="insights" class="hidden">Insights</button>
+      <button data-tab="talk" class="hidden">Talk</button>
+      <button data-tab="campus" class="hidden">Campus</button>
     </nav>
 
     <!-- Professor -->
@@ -184,6 +196,13 @@
       </div>
       <p class="fine">Add to home screen: Share, then "Add to Home Screen" on iPhone, or the install prompt on Android.</p>
     </section>
+
+    <!-- Feature slots: each feature fills its own section from JS. -->
+    <section id="tab-flock" class="panel hidden"></section>
+    <section id="tab-move" class="panel hidden"></section>
+    <section id="tab-insights" class="panel hidden"></section>
+    <section id="tab-talk" class="panel hidden"></section>
+    <section id="tab-campus" class="panel hidden"></section>
 
     <div id="toast" class="toast hidden"></div>
   </main>
