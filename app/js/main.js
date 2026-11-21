@@ -233,7 +233,7 @@ function draw(now) {
   if (img) {
     g.save();
     if (act === 'walk' && walkDir < 0 && !pet.isEgg) { g.translate(x * 2 + 32, 0); g.scale(-1, 1); }
-    g.drawImage(img, x, y, 32, 32);
+    if (ctx.paintPet) ctx.paintPet(g, img, x, y, now, frame); else g.drawImage(img, x, y, 32, 32);   // W6 mood look
     g.restore();
   }
 

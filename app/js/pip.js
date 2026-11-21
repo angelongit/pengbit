@@ -237,7 +237,7 @@ function draw(now) {
   if (pet.shivering) x += (Math.floor(now / 50) % 2) ? 1 : -1;
 
   const img = slouching && extra.slouch_a ? (frame ? extra.slouch_b : extra.slouch_a) : sprite(pet.form, frame);
-  if (img) g.drawImage(img, x, y, 32, 32);
+  if (img) { if (ctx.paintPet) ctx.paintPet(g, img, x, y, now, frame); else g.drawImage(img, x, y, 32, 32); }
 
   if (pet.mode === 'desk' && act === 'walk' && !pet.isEgg) {   // away: empty desk chair hint
     g.fillStyle = '#ffd84a'; g.fillRect(41, 6, 3, 1); g.fillRect(42, 5, 1, 3);
