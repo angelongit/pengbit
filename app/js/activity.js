@@ -113,7 +113,7 @@ export class MLP {
     const train = [], val = [];
     for (const a of ACTS) {
       const rows = data.filter((d) => d.label === a).sort(() => Math.random() - 0.5);
-      const nv = rows.length >= 5 ? Math.max(1, Math.round(rows.length * valFrac)) : 0;
+      const nv = valFrac > 0 && rows.length >= 5 ? Math.max(1, Math.round(rows.length * valFrac)) : 0;
       val.push(...rows.slice(0, nv)); train.push(...rows.slice(nv));
     }
     const F = this.nIn;

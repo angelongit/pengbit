@@ -8,8 +8,10 @@ import {
   PostureDetector,
   extractFrameMetrics,
   computeBaseline,
-  createPostureMLP,
-  evaluateModels,
+  trainPostureModel,
+  loadPostureModel,
+  isPostureSample,
+  POSTURE_WINDOW_MS,
   DESK_TO_SLOT,
   SLOT_TO_DESK,
   SLOTS
@@ -18,6 +20,7 @@ import {
 const STORE_BASELINE = 'deskBaseline';
 const STORE_DATASET = 'deskDataset';
 const STORE_MODEL = 'deskModel';
+const STORE_USE_ML = 'deskUseML';
 
 export function init(ctx) {
   const section = document.getElementById('tab-desk');
@@ -30,14 +33,13 @@ export function init(ctx) {
 
   // Load persisted state
   let baseline = ctx.store.get(STORE_BASELINE, null);
-  let dataset = ctx.store.get(STORE_DATASET, []);
-  let savedWeights = ctx.store.get(STORE_MODEL, null);
-  let mlp = savedWeights ? createPostureMLP(savedWeights) : null;
+  let dataset = ctx.store.get(STORE_DATASET, []).filter(isPostureSample);
+  let mlp = loadPostureModel(ctx.store.get(STORE_MODEL, null));
 
   const detector = new PostureDetector({
     baseline,
     model: mlp,
-    useML: !!mlp
+    useML: !!mlp && ctx.store.get(STORE_USE_ML, true)
   });
 
   // Load shipped posture-model.json if no local trained model exists
@@ -45,10 +47,11 @@ export function init(ctx) {
     fetch('./model/posture-model.json')
       .then((r) => (r.ok ? r.json() : null))
       .then((weights) => {
-        if (weights && weights.W1) {
-          mlp = createPostureMLP(weights);
+        const shipped = loadPostureModel(weights);
+        if (!mlp && shipped) {
+          mlp = shipped;
           detector.setModel(mlp);
-          detector.setUseML(true);
+          detector.setUseML(ctx.store.get(STORE_USE_ML, true));
           updateUI();
         }
       })
@@ -62,6 +65,7 @@ export function init(ctx) {
   let calibrating = false;
   let calibFrames = [];
   let recording = false;
+  let recordAfter = 0;
   let recordLabel = 'upright'; // 'upright' | 'slouch' | 'away'
   let recordPerson = 'person1';
 
@@ -167,7 +171,7 @@ export function init(ctx) {
     elVideoWrap.hidden = !isDesk || !showPreview;
     elPreviewBtn.textContent = showPreview ? 'Hide Camera' : 'Show Camera';
     elChkML.disabled = !mlp;
-    if (!mlp) elChkML.checked = false;
+    elChkML.checked = !!mlp && detector.useML;
 
     const counts = { upright: 0, slouch: 0, away: 0 };
     const people = new Set();
@@ -216,6 +220,7 @@ export function init(ctx) {
       emit('mode:changed', { mode: 'desk' });
 
       tickTimer = setInterval(() => {
+        const now = performance.now();
         const res = detector.classifyWindow();
         const displayName = labels[res.act] || res.label;
         const pct = Math.round((res.conf || 0) * 100);
@@ -228,7 +233,9 @@ export function init(ctx) {
 
         emit('desk:posture', { label: res.label, conf: res.conf });
 
-        if (recording && res.features) {
+        const samples = detector.buffer;
+        if (recording && !calibrating && now >= recordAfter && samples.length
+          && now - samples.at(-1).t < 500 && samples.at(-1).t - samples[0].t >= 1500) {
           dataset.push({
             x: res.features,
             y: DESK_TO_SLOT[recordLabel],
@@ -262,7 +269,9 @@ export function init(ctx) {
       poseHandle = null;
     }
     recording = false;
+    detector.reset();
     elRecBtn.textContent = 'Record';
+    elRecBtn.classList.remove('recording');
     elVideo.srcObject = null;
 
     ctx.pet.mode = 'phone';
@@ -314,19 +323,27 @@ export function init(ctx) {
 
   elChkML.addEventListener('change', () => {
     detector.setUseML(elChkML.checked);
+    ctx.store.set(STORE_USE_ML, elChkML.checked);
   });
 
   elRecLabel.addEventListener('change', () => {
     recordLabel = elRecLabel.value;
+    recordAfter = performance.now() + POSTURE_WINDOW_MS;
   });
   elRecPerson.addEventListener('input', () => {
     recordPerson = elRecPerson.value.trim() || 'person1';
+    recordAfter = performance.now() + POSTURE_WINDOW_MS;
   });
 
   elRecBtn.addEventListener('click', async () => {
     if (!poseHandle) await startDeskMode();
     if (!poseHandle) return;
+    if (!recording && (!baseline || calibrating)) {
+      ctx.toast('Finish upright calibration before recording.');
+      return;
+    }
     recording = !recording;
+    recordAfter = performance.now() + POSTURE_WINDOW_MS;
     elRecBtn.textContent = recording ? 'Stop Recording' : 'Record';
     elRecBtn.classList.toggle('recording', recording);
   });
@@ -339,44 +356,32 @@ export function init(ctx) {
   });
 
   elTrainBtn.addEventListener('click', () => {
-    if (dataset.length < 15) {
-      ctx.toast('Record at least ~15 windows across all 3 postures first.');
+    if (recording || calibrating) {
+      ctx.toast('Stop recording and finish calibration before training.');
       return;
     }
-
-    // Hold out one person if >= 2 people exist, else 80/20 split
-    const people = [...new Set(dataset.map((s) => s.person || 'person1'))];
-    let trainSet, testSet, splitNote;
-    if (people.length >= 2) {
-      const heldOut = people[people.length - 1];
-      trainSet = dataset.filter((s) => (s.person || 'person1') !== heldOut);
-      testSet = dataset.filter((s) => (s.person || 'person1') === heldOut);
-      splitNote = `Held-out person: ${heldOut} (${testSet.length} windows)`;
-    } else {
-      const shuffled = [...dataset].sort(() => Math.random() - 0.5);
-      const cut = Math.floor(shuffled.length * 0.8);
-      trainSet = shuffled.slice(0, cut);
-      testSet = shuffled.slice(cut);
-      splitNote = `80/20 split (${testSet.length} test windows)`;
+    let result;
+    try {
+      result = trainPostureModel(dataset);
+    } catch (error) {
+      elEval.textContent = error.message;
+      return;
     }
-
-    const model = createPostureMLP();
-    model.train(trainSet);
+    const { model, heldOut, trainCount, evaluation: ev } = result;
+    const splitNote = heldOut
+      ? `Held-out person: ${heldOut} (${ev.total} test windows)`
+      : `Single-person time split (${ev.total} test windows)`;
+    const useML = ev.mlpAcc >= ev.thresholdAcc;
     mlp = model;
-    detector.setModel(mlp);
-    detector.setUseML(true);
-    elChkML.disabled = false;
-    elChkML.checked = true;
-
-    const weights = typeof mlp.toJSON === 'function' ? mlp.toJSON() : mlp;
-    ctx.store.set(STORE_MODEL, weights);
-
-    const ev = evaluateModels(testSet, mlp);
+    detector.setModel(model);
+    detector.setUseML(useML);
+    ctx.store.set(STORE_MODEL, model.toJSON());
+    ctx.store.set(STORE_USE_ML, useML);
     const fmt = (m) =>
       m.map((r, i) => `${SLOT_TO_DESK[SLOTS[i]].padEnd(7)}: ${r.join('  ')}`).join('\n');
 
     elEval.textContent =
-      `${splitNote}\n` +
+      `${splitNote}\nTrained on ${trainCount} windows. ${useML ? 'ML model enabled.' : 'Thresholds still active.'}\n` +
       `MLP acc:       ${(ev.mlpAcc * 100).toFixed(1)}%\n` +
       `Threshold acc: ${(ev.thresholdAcc * 100).toFixed(1)}%\n\n` +
       `MLP confusion (rows=true, cols=away/up/slouch):\n${fmt(ev.mlpConfusion)}`;
@@ -395,9 +400,10 @@ export function init(ctx) {
     try {
       const imported = JSON.parse(await file.text());
       if (Array.isArray(imported)) {
-        dataset = dataset.concat(imported);
+        const valid = imported.filter(isPostureSample);
+        dataset = dataset.concat(valid);
         ctx.store.set(STORE_DATASET, dataset);
-        ctx.toast(`Imported ${imported.length} windows`);
+        ctx.toast(`Imported ${valid.length} valid windows`);
         updateUI();
       }
     } catch {
