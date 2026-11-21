@@ -50,5 +50,7 @@ New features plug in without editing `main.js`:
    `pet:minute` {act, at}, `activity:window` {f, result} (every second), `model:changed` {source, valAcc}.
 4. `ctx` (see `js/ctx.js`): `pet` (with `reward({happy, energy, reason, reps})`, `answerNudge(via)`), `detector`, `store`,
    `settings`, `getModel()`, `setModel(mlp, source)`, `getDataset()`, `addData(rows)`, `toast`, `bubble`, `say`, `chirp`,
-   `vibrate`, `showTab`, `openTab`, `render`, `deviceId`.
+   `vibrate`, `showTab`, `openTab`, `render`, `deviceId`, `setActivitySource(src)` (src.last = {act, conf, source, label};
+   null goes back to the phone's motion), `getActivity()`.
+   Desk mode: `pet.mode` is 'phone' or 'desk'; `MODE_LABELS` in pet.js gives display names; `new MLP(null, { nIn })`.
 5. Add new files to `SHELL` in `sw.js` and bump `CACHE`.

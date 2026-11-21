@@ -75,9 +75,10 @@ function randn() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v 
 const zeros = (r, c) => Array.from({ length: r }, () => new Float64Array(c));
 
 export class MLP {
-  constructor(json) {
+  // new MLP(savedJson) restores a model; new MLP(null, { nIn }) makes one for another feature count (Desk mode).
+  constructor(json, { nIn = FEATURE_NAMES.length, nH = 16 } = {}) {
     if (json) { Object.assign(this, json); return; }
-    this.nIn = FEATURE_NAMES.length; this.nH = 16; this.nOut = ACTS.length;
+    this.nIn = nIn; this.nH = nH; this.nOut = ACTS.length;
   }
 
   init() {
@@ -114,7 +115,7 @@ export class MLP {
       const nv = rows.length >= 5 ? Math.max(1, Math.round(rows.length * valFrac)) : 0;
       val.push(...rows.slice(0, nv)); train.push(...rows.slice(nv));
     }
-    const F = FEATURE_NAMES.length;
+    const F = this.nIn;
     this.mu = Array.from({ length: F }, (_, i) => mean(train.map((d) => d.f[i])));
     this.sd = Array.from({ length: F }, (_, i) => std(train.map((d) => d.f[i]), this.mu[i]) || 1);
     this.init();
@@ -160,7 +161,7 @@ export class MLP {
 
   toJSON() {
     const { nIn, nH, nOut, W1, b1, W2, b2, mu, sd, trainedAt, stats } = this;
-    return { kind: 'pengbit-mlp', version: 1, features: FEATURE_NAMES, labels: ACTS, nIn, nH, nOut,
+    return { kind: 'pengbit-mlp', version: 1, features: nIn === FEATURE_NAMES.length ? FEATURE_NAMES : undefined, labels: ACTS, nIn, nH, nOut,
       W1, b1: Array.from(b1), W2, b2: Array.from(b2), mu, sd, trainedAt, stats };
   }
 }

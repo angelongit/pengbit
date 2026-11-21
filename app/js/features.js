@@ -6,7 +6,8 @@ const FEATURES = [
   // './exercise.js',   // W2 Camera-verified exercise
   // './insights.js',   // W3 Predictive nudges + weekly report
   // './talk.js',       // W4 Talk to Professor Floe
-  // './campus.js',     // W5 Campus wellness dashboard
+  // './desk.js',       // W5 Desk mode (posture)
+  // './campus.js',     // W9 Campus wellness dashboard
 ];
 
 export async function initFeatures(ctx) {

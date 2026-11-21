@@ -1,5 +1,5 @@
 // Pengbit phone app: glue between the pet, the motion detector, the canvas and the professor.
-import { Pet, CFG, FORMS } from './pet.js';
+import { Pet, CFG, FORMS, MODE_LABELS } from './pet.js';
 import { ActivityDetector, MLP, ACTS, FEATURE_NAMES, requestMotionPermission } from './activity.js';
 import { loadSprites, sprite } from './sprites.js';
 import { unlockAudio, chirp, vibrate, speak, stopSpeaking } from './audio.js';
@@ -21,6 +21,9 @@ const saveSettings = () => store.set('settings', settings);
 
 const pet = new Pet(store.get('pet', null));
 const detector = new ActivityDetector();
+// Another feature (Desk mode) can drive the pet instead of the phone's motion: src.last = {act, conf, source, label}.
+let activitySource = null;
+const activity = () => (activitySource && activitySource.last) || detector.last;
 let dataset = store.get('dataset', []);       // [{f, label}]
 let model = null;
 let dexHistory = store.get('dex', []);        // [{form, text, at}]
@@ -142,10 +145,10 @@ function tick() {
   lastTick = now;
   if (document.hidden) return;
   const dt = real * (settings.demo ? CFG.DEMO_SPEEDUP : 1);
-  pet.tick(dt, detector.last.act);
+  pet.tick(dt, activity().act);
   handleEvents();
   petMinuteAcc += dt;
-  while (petMinuteAcc >= 60) { petMinuteAcc -= 60; emit('pet:minute', { act: detector.last.act, at: Date.now() }); }
+  while (petMinuteAcc >= 60) { petMinuteAcc -= 60; emit('pet:minute', { act: activity().act, at: Date.now() }); }
   store.set('pet', pet);
   renderStatus();
 }
@@ -156,10 +159,10 @@ function renderStatus() {
   for (const [id, v] of [['barHappy', pet.happy], ['barEnergy', pet.energy]]) {
     $(id).style.width = v + '%'; $(id).classList.toggle('low', v < CFG.LOW_STAT);
   }
-  const a = detector.last;
-  $('actName').textContent = a.act; $('actName').className = a.act;
+  const a = activity();
+  $('actName').textContent = (MODE_LABELS[pet.mode] || MODE_LABELS.phone)[a.act] || a.act; $('actName').className = a.act;
   $('actConf').textContent = a.source === 'ml' ? `AI ${Math.round(a.conf * 100)}% sure`
-    : a.source === 'thresholds' ? 'threshold rules' : a.source === 'sim' ? 'simulated' : 'no motion sensor';
+    : a.source === 'thresholds' ? 'threshold rules' : a.source === 'sim' ? 'simulated' : a.source === 'none' ? 'no motion sensor' : (a.label || a.source || '');
 
   if (pet.isEgg) { $('leanName').textContent = 'hatching'; $('evoEta').textContent = 'keep it with you'; }
   else if (pet.form === 'baby') {
@@ -196,7 +199,7 @@ let walkX = 32, walkDir = 1;
 
 function draw(now) {
   const g = scene, W = 96, H = 64;
-  const act = detector.last.act;
+  const act = activity().act;
   const form = pet.form;
   g.fillStyle = form === 'frost' ? '#0d3040' : form === 'glitch' ? '#1a0d2e' : '#0d2a36';
   g.fillRect(0, 0, W, H);
@@ -429,6 +432,8 @@ function fillCtx() {
   Object.assign(ctx, {
     pet, detector, store, settings, saveSettings,
     getModel: () => model, setModel,
+    setActivitySource(src) { activitySource = src || null; renderStatus(); },
+    getActivity: activity,
     getDataset: () => dataset,
     addData(rows) { dataset = dataset.concat(rows); store.set('dataset', dataset); countData(); },
     toast, bubble, say: (text) => say(text, false), chirp, vibrate,

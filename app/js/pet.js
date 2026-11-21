@@ -30,6 +30,12 @@ export const FORMS = {
   glitch:   { name: 'Glitch Pengbit',   blurb: 'Raised on shakes. Crackles with static.' },
 };
 
+// Activity names per mode. Desk mode reuses the same three slots for posture.
+export const MODE_LABELS = {
+  phone: { walk: 'walk', still: 'still', shake: 'shake' },
+  desk: { walk: 'away', still: 'upright', shake: 'slouch' },
+};
+
 const clamp = (v) => Math.max(0, Math.min(100, Math.round(v)));
 
 export class Pet {
@@ -41,6 +47,7 @@ export class Pet {
 
   reset() {
     this.name = this.name || 'Pengbit';
+    this.mode = this.mode || 'phone';     // 'phone' (motion) or 'desk' (posture); kept across new eggs
     this.happy = CFG.STAT_START;
     this.energy = CFG.STAT_START;
     this.form = 'egg';
@@ -110,7 +117,8 @@ export class Pet {
     this.checkLowStats();
 
     // Sitting nudge. STILL builds the streak, WALK clears it, SHAKE leaves it alone.
-    if (act === 'still') {
+    // In desk mode a slouch is still sitting, so it builds the streak too.
+    if (act === 'still' || (this.mode === 'desk' && act === 'shake')) {
       this.stillStreak += dt;
       if (this.stillStreak >= this.nextNudgeAt) {
         this.push('idle', Math.floor(this.stillStreak / 60));
@@ -199,6 +207,7 @@ export class Pet {
       nudges: this.nudges,
       nudgesAnswered: this.nudgesAnswered,
       exercise: { sessions: this.exercise.sessions, reps: this.exercise.reps },
+      mode: this.mode,
     };
   }
 }
